@@ -6,20 +6,24 @@ import streamlit as st
 
 st.set_page_config(page_title="Shorts AI SaaS", page_icon="🚀")
 
-st.title("🚀 AI Shorts Generator")
-st.write("Minecraft fonuna uyğun gecə və motivasiya videoları yaradın!")
+st.title("🚀 AI Shorts Generator (Türkiye Pazarı İçin)")
+st.write(
+    "Tamamen doğal Türkiye Türkçesi ləhcəsi və boşluksuz, səliqəli altyazı"
+    " sistemi!"
+)
 
 text_input = st.text_area(
-    "Videoda səsləndiriləcək mətn (Türkcə/Azərbaycanca):",
+    "Videoda səsləndiriləcək mətn (Türkiye Türkçesi):",
     (
-        "Bilirsinizmi, əsl uğur heç vaxt təsadüfən gəlmir. Gecə yarısı hər"
-        " kəs yuxudaykən, otağında təkbaşına nəsə qurmağa çalışırsansa, deməli"
-        " sən fərqlisən."
+        "Köyün ortasında, herkesin uyuduğu gece saatlerinde odasında çalışan bir"
+        " genç vardı. Kimseye kulak asmadan kendi geleceğini inşa ediyordu."
+        " Çünkü gerçek başarı sabırla kazanılır!"
     ),
 )
 
+# Sırf Türkiye Türkçəsi üçün ən təbii neural səslər
 voice = st.selectbox(
-    "Səs seçin:", ["tr-TR-AhmetNeural", "tr-TR-EmelNeural", "az-AZ-BabekNeural"]
+    "Türkiye Türkçesi Ses Seçin:", ["tr-TR-AhmetNeural", "tr-TR-EmelNeural"]
 )
 
 
@@ -28,18 +32,19 @@ async def generate_audio(text, voice_name, output_path):
   await communicate.save(output_path)
 
 
-if st.button("🎥 Videonu Yarat"):
+if st.button("🎥 Profesyonel Video Oluştur"):
   if not text_input.strip():
-    st.warning("Zəhmət olmasa mətn daxil edin!")
+    st.warning("Lütfen bir metin girin!")
   else:
-    with st.spinner("Video hazırlanır, zəhmət olmasa gözləyin..."):
+    with st.spinner("Türkiye Türkçesi ses, altyazı ve video işleniyor..."):
       audio_file = "temp_audio.mp3"
       output_file = "final_output.mp4"
       background_video = "background.mp4"
 
       if not os.path.exists(background_video):
-        st.error("Xəta: 'background.mp4' faylı tapılmadı!")
+        st.error("Hata: 'background.mp4' dosyası bulunamadı!")
       else:
+        # 1. Səsi təmiz Türkiyə türkcəsində yaradırıq
         asyncio.run(generate_audio(text_input, voice, audio_file))
 
         try:
@@ -49,51 +54,51 @@ if st.button("🎥 Videonu Yarat"):
           if video.duration > audio.duration:
             video = video.subclipped(0, audio.duration)
 
-          # Sözləri bölürük və şrifti daha səliqəli, kiçik edirik
+          # Mətni sözlərə ayırırıq
           words = text_input.split()
           clips = [video]
-          duration_per_word = audio.duration / max(len(words), 1)
 
-          chunk_size = 3  # Eyni anda 3 söz çıxsın ki, ekrana rahat sığışsın
-          for i in range(0, len(words), chunk_size):
+          # Sözlərin arasında boşluq qalmaması üçün hər sözün sürətini səsə görə hesablayırıq
+          total_words = len(words)
+          time_per_word = audio.duration / max(total_words, 1)
+
+          # Hər dəfə 2-3 söz ekranda axıcı şəkildə, boşluqsuz dəyişəcək
+          chunk_size = 2
+          for i in range(0, total_words, chunk_size):
             chunk = " ".join(words[i : i + chunk_size])
-            start_time = (i / chunk_size) * (
-                audio.duration / (len(words) / chunk_size)
-            )
-            end_time = min(start_time + (duration_per_word * chunk_size), audio.duration)
+            start_time = i * time_per_word
+            end_time = min((i + chunk_size) * time_per_word, audio.duration)
 
             try:
               txt_clip = (
                   TextClip(
                       text=chunk,
-                      font_size=32,  # Şrift ölçüsü kiçildildi ki, ekrana sığsın
-                      color="white",
+                      font="DejaVuSans-Bold",
+                      font_size=40,
+                      color="yellow",  # Diqqət çəkən profesyonel sarı rəng
                       stroke_color="black",
-                      stroke_width=1.5,
+                      stroke_width=2,
                       method="caption",
-                      size=(int(video.w * 0.8), None),
+                      size=(int(video.w * 0.85), None),
                   )
                   .with_start(start_time)
-                  .with_duration(end_time - start_time)
+                  .with_duration(
+                      max(0.1, end_time - start_time)
+                  )  # Boşluq qalmaması üçün minimum müddət
                   .with_position(("center", "center"))
               )
               clips.append(txt_clip)
-            except Exception:
-              pass
+            except Exception as t_err:
+              st.write(f"Altyazı hatası: {t_err}")
 
           final_video = CompositeVideoClip(clips)
           final_video = final_video.with_audio(audio)
 
           final_video.write_videofile(
               output_file,
-              fps=24,
-              codec="libx264",
-              audio_codec="aac",
-              preset="ultrafast",
-              logger=None,
           )
 
-          st.success("🎉 Video hazırdır!")
+          st.success("🎉 Video hazır! Türkiyə bazarı üçün tam uyğundur.")
           st.video(output_file)
 
           with open(output_file, "rb") as file:
@@ -105,5 +110,4 @@ if st.button("🎥 Videonu Yarat"):
             )
 
         except Exception as e:
-          st.error(f"Xəta baş verdi: {e}")
-                                     
+          st.error(f"Hata oluştu: {e}")
