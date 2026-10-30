@@ -9,7 +9,7 @@ st.set_page_config(
 )
 
 # ---------------------------------------------------------
-# CAPCUT / OPUS CLIIP İLHAMLI MİNİMALİST & PRO DİZAYN (CSS)
+# DÜZGÜN VƏ OXUNAQLI CSS DİZAYNI (GÖRMƏ PROBLEMİNİN HƏLLİ)
 # ---------------------------------------------------------
 st.markdown(
     """
@@ -20,13 +20,20 @@ st.markdown(
         font-family: 'Inter', sans-serif;
     }
     
+    /* Mətn xanasının (Text Area) rəngləri təmiz və oxunaqlı olsun */
+    .stTextArea textarea {
+        background-color: #1f2937 !important;
+        color: #ffffff !important;
+        border: 1px solid #374151 !important;
+        border-radius: 12px !important;
+    }
+    
     /* Əsas Konteyner Kartı */
     .main-box {
-        background: rgba(17, 24, 39, 0.7);
-        border: 1px solid rgba(255, 255, 255, 0.08);
+        background: rgba(17, 24, 39, 0.85);
+        border: 1px solid rgba(255, 255, 255, 0.1);
         border-radius: 20px;
-        padding: 30px;
-        backdrop-filter: blur(10px);
+        padding: 25px;
         box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
         margin-bottom: 25px;
     }
@@ -67,7 +74,7 @@ st.markdown(
 )
 
 # ---------------------------------------------------------
-# SIDEBAR - ABUNƏLİK VƏ QİYMƏTLƏR (Stripe Entegrasyonu)
+# SIDEBAR - ABUNƏLİK VƏ QİYMƏTLƏR
 # ---------------------------------------------------------
 with st.sidebar:
   st.markdown("### ⚡ Shorts AI Studio")
@@ -99,7 +106,7 @@ with st.sidebar:
   st.caption("🔒 256-Bit SSL Secured by Stripe")
 
 # ---------------------------------------------------------
-# ANA EKRAN (CAPCUT / OPUS ÜSLUBU)
+# ANA EKRAN
 # ---------------------------------------------------------
 st.markdown(
     '<div><span class="badge">✨ AI-POWERED SHORTS ENGINE v3.0</span></div>',
@@ -163,7 +170,6 @@ async def generate_audio(text, voice_name, output_path):
   await communicate.save(output_path)
 
 
-# Render Düğməsi
 if st.button("✨ VİDEOYU SİHİRLİ ŞEKİLDE OLUŞTUR"):
   if not text_input.strip():
     st.warning("Lütfen bir metin girin!")
@@ -250,4 +256,3 @@ if st.button("✨ VİDEOYU SİHİRLİ ŞEKİLDE OLUŞTUR"):
 
         except Exception as e:
           st.error(f"Hata oluştu: {e}")
-    
