@@ -4,113 +4,181 @@ import edge_tts
 from moviepy import AudioFileClip, CompositeVideoClip, TextClip, VideoFileClip
 import streamlit as st
 
-st.set_page_config(page_title="Shorts AI SaaS", page_icon="🚀")
-
-st.title("🚀 AI Shorts Generator (Pro Versiya)")
-st.write("Hərf kəsilməsi düzəldilmiş və daha canlı səs sistemi!")
-
-text_input = st.text_area(
-    "Videoda səsləndiriləcək mətn (Türkiye Türkçesi):",
-    (
-        "Biliyor musun? Gece yarısı odasında tek başına oturup hayalleri için"
-        " savaşan insanları asla küçümseme..."
-    ),
+# Səhifə konfiqurasiyası
+st.set_page_config(
+    page_title="Shorts AI Studio | Viral Video Creation",
+    page_icon="⚡",
+    layout="wide",
+    initial_sidebar_state="expanded",
 )
 
-# Səs seçimi (Emel və ya Ahmet - tonlama ilə daha təbii çıxır)
-voice = st.selectbox(
-    "Səs Seçin:", ["tr-TR-EmelNeural", "tr-TR-AhmetNeural"]
+# ---------------------------------------------------------
+# PSİXOLOJİ VƏ PEŞƏKAR SAAS CSS DİZAYNI (DARK NEON STYLE)
+# ---------------------------------------------------------
+st.markdown(
+    """
+    <style>
+    /* Ümumi Arxa Fon və Şriftlər */
+    .stApp {
+        background-color: #0d0f12;
+        color: #e6e8ec;
+    }
+    
+    /* Yan Menyu (Sidebar) Stylinq */
+    [data-testid="stSidebar"] {
+        background-color: #13171f;
+        border-right: 1px solid #222733;
+    }
+    
+    /* Peşəkar Kartlar (Pricing & Feature Cards) */
+    .pro-card {
+        background: linear-gradient(145deg, #181d28, #10141d);
+        border: 1px solid #2a3142;
+        border-radius: 16px;
+        padding: 24px;
+        margin-bottom: 20px;
+        box-shadow: 0 8px 20px rgba(0,0,0,0.4);
+        transition: transform 0.3s ease;
+    }
+    .pro-card:hover {
+        border-color: #f59e0b;
+        transform: translateY(-2px);
+    }
+    
+    .pricing-card-featured {
+        background: linear-gradient(145deg, #1e1b4b, #0f172a);
+        border: 2px solid #8b5cf6;
+        border-radius: 16px;
+        padding: 20px;
+        box-shadow: 0 0 25px rgba(139, 92, 246, 0.25);
+    }
+    
+    /* Düyələr (Buttons) - Psixoloji İmpulsiv Rənglər */
+    .stButton>button {
+        background: linear-gradient(90deg, #f59e0b, #d97706);
+        color: #000000 !important;
+        font-weight: 800 !important;
+        font-size: 18px !important;
+        border-radius: 12px !important;
+        border: none !important;
+        padding: 12px 28px !important;
+        box-shadow: 0 4px 15px rgba(245, 158, 11, 0.3);
+        width: 100%;
+        transition: all 0.3s ease;
+    }
+    .stButton>button:hover {
+        background: linear-gradient(90deg, #fbbf24, #f59e0b);
+        box-shadow: 0 6px 20px rgba(245, 158, 11, 0.5);
+        transform: scale(1.01);
+    }
+    
+    /* Vurğulanan Mətnlər */
+    .badge-viral {
+        background-color: rgba(245, 158, 11, 0.15);
+        color: #f59e0b;
+        padding: 6px 14px;
+        border-radius: 20px;
+        font-size: 13px;
+        font-weight: 700;
+        border: 1px solid rgba(245, 158, 11, 0.3);
+        display: inline-block;
+        margin-bottom: 12px;
+    }
+    .badge-pro {
+        background-color: rgba(139, 92, 246, 0.2);
+        color: #c084fc;
+        padding: 4px 10px;
+        border-radius: 8px;
+        font-size: 12px;
+        font-weight: 700;
+    }
+    </style>
+    """,
+    unsafe_allow_html=True,
 )
 
-
-async def generate_audio(text, voice_name, output_path):
-  # Səsin robotikliyini azaltmaq üçün təbii sürət və ton tənzimləməsi
-  communicate = edge_tts.Communicate(
-      text, voice_name, rate="+5%", pitch="+0Hz"
+# ---------------------------------------------------------
+# SIDEBAR - PEŞƏKAR YAN MENYU VƏ ABUNƏLİK PAKETLƏRİ
+# ---------------------------------------------------------
+with st.sidebar:
+  st.markdown(
+      '<div><span class="badge-pro">PRO SAAS STUDIO</span></div>',
+      unsafe_allow_html=True,
   )
-  await communicate.save(output_path)
+  st.title("⚡ Shorts AI Studio")
+  st.caption("Otomatik Viral Video Üretim Platformu")
+
+  st.divider()
+
+  st.subheader("💳 Abonelik Planları")
+
+  plan = st.radio(
+      "Plan Seçin:",
+      [
+          "Ücretsiz Deneme",
+          "Pro Creator ($9.99/ay)",
+          "Unlimited Empire ($29.99/ay)",
+      ],
+      index=1,
+  )
+
+  if "Pro Creator" in plan:
+    st.markdown(
+        """
+        <div class="pricing-card-featured">
+            <span class="badge-viral">ÇOK SATAN</span>
+            <h3 style="margin:0; color:#fff;">Pro Creator</h3>
+            <h2 style="margin:5px 0; color:#f59e0b;">$9.99 <span style="font-size:14px; color:#a1a1aa;">/ ay</span></h2>
+            <ul style="font-size:13px; padding-left:18px; color:#d4d4d8;">
+                <li><b>200 Viral Video</b> / ay</li>
+                <li>Ultra HD Render Hızı</li>
+                <li>Filigransız & Yüksek Kalite</li>
+                <li>Türkiye Lider Ses Motoru</li>
+            </ul>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+    st.markdown("<br>", unsafe_allow_html=True)
+    st.markdown(
+        "[👉 Pro Pakete Geç ($9.99)](https://buy.stripe.com/test_pro_plan)"
+    )
+
+  elif "Unlimited" in plan:
+    st.markdown(
+        """
+        <div class="pro-card">
+            <span class="badge-pro">SINIRSIZ EŞİSİZ POWER</span>
+            <h3 style="margin:0; color:#fff;">Unlimited Empire</h3>
+            <h2 style="margin:5px 0; color:#c084fc;">$29.99 <span style="font-size:14px; color:#a1a1aa;">/ ay</span></h2>
+            <ul style="font-size:13px; padding-left:18px; color:#d4d4d8;">
+                <li><b>Sınırsız Video Üretimi</b></li>
+                <li>7/24 Öncelikli Sunucu Gücü</li>
+                <li>Özel Altyazı & Font Şablonları</li>
+                <li>Sınırsız Ticari Kullanım Haktan</li>
+            </ul>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+    st.markdown("<br>", unsafe_allow_html=True)
+    st.markdown(
+        "[👉 Sınırsız Pakete Geç"
+        " ($29.99)](https://buy.stripe.com/test_unlimited_plan)"
+    )
+
+  st.divider()
+  st.caption("🔒 256-Bit SSL ile Güvenli Ödeme - Stripe Infrastructure")
 
 
-if st.button("🎥 Qüsursuz Video Yarat"):
-  if not text_input.strip():
-    st.warning("Zəhmət olmasa mətn daxil edin!")
-  else:
-    with st.spinner("Video və səs tənzimlənir, gözləyin..."):
-      audio_file = "temp_audio.mp3"
-      output_file = "final_output.mp4"
-      background_video = "background.mp4"
-
-      if not os.path.exists(background_video):
-        st.error("Xəta: 'background.mp4' faylı tapılmadı!")
-      else:
-        asyncio.run(generate_audio(text_input, voice, audio_file))
-
-        try:
-          video = VideoFileClip(background_video)
-          audio = AudioFileClip(audio_file)
-
-          if video.duration > audio.duration:
-            video = video.subclipped(0, audio.duration)
-
-          words = text_input.split()
-          clips = [video]
-
-          total_words = len(words)
-          time_per_word = audio.duration / max(total_words, 1)
-
-          chunk_size = 2
-          for i in range(0, total_words, chunk_size):
-            chunk = " ".join(words[i : i + chunk_size])
-            start_time = i * time_per_word
-            end_time = min((i + chunk_size) * time_per_word, audio.duration)
-
-            try:
-              txt_clip = (
-                  TextClip(
-                      text=chunk,
-                      font="DejaVuSans-Bold",
-                      font_size=42,
-                      color="yellow",
-                      stroke_color="black",
-                      stroke_width=2,
-                      method="caption",
-                      size=(int(video.w * 0.85), None),
-                      margin=(
-                          15,
-                          15,
-                      ),  # Hərflərin quyruqlarının kəsilməməsi üçün kənar boşluğu!
-                  )
-                  .with_start(start_time)
-                  .with_duration(max(0.15, end_time - start_time))
-                  .with_position(("center", "center"))
-              )
-              clips.append(txt_clip)
-            except Exception as t_err:
-              st.write(f"Xəta: {t_err}")
-
-          final_video = CompositeVideoClip(clips)
-          final_video = final_video.with_audio(audio)
-
-          final_video.write_videofile(
-              output_file,
-              fps=24,
-              codec="libx264",
-              audio_codec="aac",
-              preset="ultrafast",
-              logger=None,
-          )
-
-          st.success("🎉 Video hazırdır! Hərflər və səs tənzimləndi.")
-          st.video(output_file)
-
-          with open(output_file, "rb") as file:
-            st.download_button(
-                label="📥 Videonu İndir",
-                data=file,
-                file_name="ai_short.mp4",
-                mime="video/mp4",
-            )
-
-        except Exception as e:
-          st.error(f"Xəta baş verdi: {e}")
-              
+# ---------------------------------------------------------
+# ANA EKRAN DİZAYNI & VİDEO GENERATOR
+# ---------------------------------------------------------
+st.markdown(
+    '<div><span class="badge-viral">🔥 VİRAL VİDEO MOTORU v2.4</span></div>',
+    unsafe_allow_html=True,
+)
+st.title("Saniyeler İçinde Keşfet Etkili Short'lar Üretin")
+st.markdown(
+    "<p style='font-size:16
+    
