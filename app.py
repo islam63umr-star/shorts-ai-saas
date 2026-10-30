@@ -7,15 +7,19 @@ import streamlit as st
 st.set_page_config(page_title="Shorts AI SaaS", page_icon="🚀")
 
 st.title("🚀 AI Shorts Generator")
-st.write("Dinamik altyazılı və real türk səsli video generatoru!")
+st.write("Minecraft fonuna uyğun gecə və motivasiya videoları yaradın!")
 
 text_input = st.text_area(
-    "Videoda səsləndiriləcək mətn (Türkçe):",
-    "1914 yılında iki kardeş, fırtınalı bir gecede denize açıldı. Dalgalar teknelerini alabora ettiğinde herkes onların yok olduğunu sandı.",
+    "Videoda səsləndiriləcək mətn (Türkcə/Azərbaycanca):",
+    (
+        "Bilirsinizmi, əsl uğur heç vaxt təsadüfən gəlmir. Gecə yarısı hər"
+        " kəs yuxudaykən, otağında təkbaşına nəsə qurmağa çalışırsansa, deməli"
+        " sən fərqlisən."
+    ),
 )
 
 voice = st.selectbox(
-    "Ses seçin:", ["tr-TR-AhmetNeural", "tr-TR-EmelNeural", "az-AZ-BabekNeural"]
+    "Səs seçin:", ["tr-TR-AhmetNeural", "tr-TR-EmelNeural", "az-AZ-BabekNeural"]
 )
 
 
@@ -24,24 +28,18 @@ async def generate_audio(text, voice_name, output_path):
   await communicate.save(output_path)
 
 
-if st.button("🎥 Dinamik Altyazılı Video Oluştur"):
+if st.button("🎥 Videonu Yarat"):
   if not text_input.strip():
-    st.warning("Lütfen bir metin girin!")
+    st.warning("Zəhmət olmasa mətn daxil edin!")
   else:
-    with st.spinner(
-        "Səs, dinamik altyazı və video sinxronlaşdırılır, gözləyin..."
-    ):
+    with st.spinner("Video hazırlanır, zəhmət olmasa gözləyin..."):
       audio_file = "temp_audio.mp3"
       output_file = "final_output.mp4"
       background_video = "background.mp4"
 
       if not os.path.exists(background_video):
-        st.error(
-            "Hata: 'background.mp4' dosyası bulunamadı! Lütfen GitHub'a"
-            " background.mp4 yükleyin."
-        )
+        st.error("Xəta: 'background.mp4' faylı tapılmadı!")
       else:
-        # 1. Səsi yarat
         asyncio.run(generate_audio(text_input, voice, audio_file))
 
         try:
@@ -51,12 +49,12 @@ if st.button("🎥 Dinamik Altyazılı Video Oluştur"):
           if video.duration > audio.duration:
             video = video.subclipped(0, audio.duration)
 
-          # Mətni sözlərə bölüb ardıcıl yerləşdiririk
+          # Sözləri bölürük və şrifti daha səliqəli, kiçik edirik
           words = text_input.split()
           clips = [video]
           duration_per_word = audio.duration / max(len(words), 1)
 
-          chunk_size = 4  # Eyni anda neçə söz görünəcək
+          chunk_size = 3  # Eyni anda 3 söz çıxsın ki, ekrana rahat sığışsın
           for i in range(0, len(words), chunk_size):
             chunk = " ".join(words[i : i + chunk_size])
             start_time = (i / chunk_size) * (
@@ -68,12 +66,12 @@ if st.button("🎥 Dinamik Altyazılı Video Oluştur"):
               txt_clip = (
                   TextClip(
                       text=chunk,
-                      font_size=50,
+                      font_size=32,  # Şrift ölçüsü kiçildildi ki, ekrana sığsın
                       color="white",
                       stroke_color="black",
-                      stroke_width=2,
+                      stroke_width=1.5,
                       method="caption",
-                      size=(int(video.w * 0.9), None),
+                      size=(int(video.w * 0.8), None),
                   )
                   .with_start(start_time)
                   .with_duration(end_time - start_time)
@@ -83,7 +81,6 @@ if st.button("🎥 Dinamik Altyazılı Video Oluştur"):
             except Exception:
               pass
 
-          # Bütün klipləri birləşdiririk
           final_video = CompositeVideoClip(clips)
           final_video = final_video.with_audio(audio)
 
@@ -96,7 +93,7 @@ if st.button("🎥 Dinamik Altyazılı Video Oluştur"):
               logger=None,
           )
 
-          st.success("🎉 Dinamik altyazılı video hazırdır!")
+          st.success("🎉 Video hazırdır!")
           st.video(output_file)
 
           with open(output_file, "rb") as file:
@@ -108,4 +105,5 @@ if st.button("🎥 Dinamik Altyazılı Video Oluştur"):
             )
 
         except Exception as e:
-          st.error(f"Hata oluştu: {e}")
+          st.error(f"Xəta baş verdi: {e}")
+                                     
