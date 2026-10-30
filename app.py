@@ -6,45 +6,43 @@ import streamlit as st
 
 st.set_page_config(page_title="Shorts AI SaaS", page_icon="🚀")
 
-st.title("🚀 AI Shorts Generator (Türkiye Pazarı İçin)")
-st.write(
-    "Tamamen doğal Türkiye Türkçesi ləhcəsi və boşluksuz, səliqəli altyazı"
-    " sistemi!"
-)
+st.title("🚀 AI Shorts Generator (Pro Versiya)")
+st.write("Hərf kəsilməsi düzəldilmiş və daha canlı səs sistemi!")
 
 text_input = st.text_area(
     "Videoda səsləndiriləcək mətn (Türkiye Türkçesi):",
     (
-        "Köyün ortasında, herkesin uyuduğu gece saatlerinde odasında çalışan bir"
-        " genç vardı. Kimseye kulak asmadan kendi geleceğini inşa ediyordu."
-        " Çünkü gerçek başarı sabırla kazanılır!"
+        "Biliyor musun? Gece yarısı odasında tek başına oturup hayalleri için"
+        " savaşan insanları asla küçümseme..."
     ),
 )
 
-# Sırf Türkiye Türkçəsi üçün ən təbii neural səslər
+# Səs seçimi (Emel və ya Ahmet - tonlama ilə daha təbii çıxır)
 voice = st.selectbox(
-    "Türkiye Türkçesi Ses Seçin:", ["tr-TR-AhmetNeural", "tr-TR-EmelNeural"]
+    "Səs Seçin:", ["tr-TR-EmelNeural", "tr-TR-AhmetNeural"]
 )
 
 
 async def generate_audio(text, voice_name, output_path):
-  communicate = edge_tts.Communicate(text, voice_name, rate="+0%", pitch="+0Hz")
+  # Səsin robotikliyini azaltmaq üçün təbii sürət və ton tənzimləməsi
+  communicate = edge_tts.Communicate(
+      text, voice_name, rate="+5%", pitch="+0Hz"
+  )
   await communicate.save(output_path)
 
 
-if st.button("🎥 Profesyonel Video Oluştur"):
+if st.button("🎥 Qüsursuz Video Yarat"):
   if not text_input.strip():
-    st.warning("Lütfen bir metin girin!")
+    st.warning("Zəhmət olmasa mətn daxil edin!")
   else:
-    with st.spinner("Türkiye Türkçesi ses, altyazı ve video işleniyor..."):
+    with st.spinner("Video və səs tənzimlənir, gözləyin..."):
       audio_file = "temp_audio.mp3"
       output_file = "final_output.mp4"
       background_video = "background.mp4"
 
       if not os.path.exists(background_video):
-        st.error("Hata: 'background.mp4' dosyası bulunamadı!")
+        st.error("Xəta: 'background.mp4' faylı tapılmadı!")
       else:
-        # 1. Səsi təmiz Türkiyə türkcəsində yaradırıq
         asyncio.run(generate_audio(text_input, voice, audio_file))
 
         try:
@@ -54,15 +52,12 @@ if st.button("🎥 Profesyonel Video Oluştur"):
           if video.duration > audio.duration:
             video = video.subclipped(0, audio.duration)
 
-          # Mətni sözlərə ayırırıq
           words = text_input.split()
           clips = [video]
 
-          # Sözlərin arasında boşluq qalmaması üçün hər sözün sürətini səsə görə hesablayırıq
           total_words = len(words)
           time_per_word = audio.duration / max(total_words, 1)
 
-          # Hər dəfə 2-3 söz ekranda axıcı şəkildə, boşluqsuz dəyişəcək
           chunk_size = 2
           for i in range(0, total_words, chunk_size):
             chunk = " ".join(words[i : i + chunk_size])
@@ -74,31 +69,38 @@ if st.button("🎥 Profesyonel Video Oluştur"):
                   TextClip(
                       text=chunk,
                       font="DejaVuSans-Bold",
-                      font_size=40,
-                      color="yellow",  # Diqqət çəkən profesyonel sarı rəng
+                      font_size=42,
+                      color="yellow",
                       stroke_color="black",
                       stroke_width=2,
                       method="caption",
                       size=(int(video.w * 0.85), None),
+                      margin=(
+                          15,
+                          15,
+                      ),  # Hərflərin quyruqlarının kəsilməməsi üçün kənar boşluğu!
                   )
                   .with_start(start_time)
-                  .with_duration(
-                      max(0.1, end_time - start_time)
-                  )  # Boşluq qalmaması üçün minimum müddət
+                  .with_duration(max(0.15, end_time - start_time))
                   .with_position(("center", "center"))
               )
               clips.append(txt_clip)
             except Exception as t_err:
-              st.write(f"Altyazı hatası: {t_err}")
+              st.write(f"Xəta: {t_err}")
 
           final_video = CompositeVideoClip(clips)
           final_video = final_video.with_audio(audio)
 
           final_video.write_videofile(
               output_file,
+              fps=24,
+              codec="libx264",
+              audio_codec="aac",
+              preset="ultrafast",
+              logger=None,
           )
 
-          st.success("🎉 Video hazır! Türkiyə bazarı üçün tam uyğundur.")
+          st.success("🎉 Video hazırdır! Hərflər və səs tənzimləndi.")
           st.video(output_file)
 
           with open(output_file, "rb") as file:
@@ -110,4 +112,5 @@ if st.button("🎥 Profesyonel Video Oluştur"):
             )
 
         except Exception as e:
-          st.error(f"Hata oluştu: {e}")
+          st.error(f"Xəta baş verdi: {e}")
+              
