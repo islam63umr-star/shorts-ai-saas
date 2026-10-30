@@ -1,29 +1,22 @@
 import asyncio
 import os
-import streamlit as st
 import edge_tts
 from moviepy import AudioFileClip, CompositeVideoClip, TextClip, VideoFileClip
-from moviepy.config import change_settings
-
-# Streamlit Cloud-da altyazıların görünməsi üçün ImageMagick yolunu tənzimləyirik
-try:
-  change_settings({"IMAGEMAGICK_BINARY": "/usr/bin/convert"})
-except:
-  pass
+import streamlit as st
 
 st.set_page_config(page_title="Shorts AI SaaS", page_icon="🚀")
 
-st.title("🚀 AI Shorts Generator (Subway Surfers)")
-st.write("Türkcə real səs və ekranda altyazı ilə avtomatik video yaradın!")
+st.title("🚀 AI Shorts Generator")
+st.write("Türkçe gerçek ses ve ekranda alt yazı ile otomatik video oluşturun!")
 
 text_input = st.text_area(
-    "Videoda səsləndiriləcək mətn (Türkcə):",
-    "Hayatta her zaman ileri bakın, çünkü arkaya bakarsanız kaybedersiniz.",
+    "Videoda seslendirilecek metin (Türkçe):",
+    "1914 yılında iki kardeş, fırtınalı bir gecede denize açıldı. Dalgalar teknelerini alabora ettiğinde herkes onların yok olduğunu sandı. Ancak aylar sonra ıssız bir adada sağ bulundular. Unutma; fırtına ne kadar güçlü olursa olsun, vazgeçmeyen insanı yutamaz!",
 )
 
-# Türk səsləri ilk sırada və seçilmiş olsun
+# Türkçe doğal sesler
 voice = st.selectbox(
-    "Səs seçin:", ["tr-TR-AhmetNeural", "tr-TR-EmelNeural", "az-AZ-BabekNeural"]
+    "Ses seçin:", ["tr-TR-AhmetNeural", "tr-TR-EmelNeural", "az-AZ-BabekNeural"]
 )
 
 
@@ -32,54 +25,52 @@ async def generate_audio(text, voice_name, output_path):
   await communicate.save(output_path)
 
 
-if st.button("🎥 Altyazılı Video Yarat"):
+if st.button("🎥 Alt Yazılı Video Oluştur"):
   if not text_input.strip():
-    st.warning("Zəhmət olmasa mətn daxil edin!")
+    st.warning("Lütfen bir metin girin!")
   else:
-    with st.spinner(
-        "Süni intellekt real türk səsini, altyazını və videonu birləşdirir..."
-    ):
+    with st.spinner("Yapay zeka sesi, alt yazıyı ve videoyu birleştiriyor..."):
       audio_file = "temp_audio.mp3"
       output_file = "final_output.mp4"
       background_video = "background.mp4"
 
       if not os.path.exists(background_video):
         st.error(
-            "Xəta: 'background.mp4' faylı tapılmadı! Zəhmət olmasa GitHub-a"
-            " background.mp4 yükləyin."
+            "Hata: 'background.mp4' dosyası bulunamadı! Lütfen GitHub'a"
+            " background.mp4 yükleyin."
         )
       else:
-        # 1. Real səsi yarat
+        # 1. Türkçe Sesi Üret
         asyncio.run(generate_audio(text_input, voice, audio_file))
 
         try:
-          # 2. Videonu və səsi yüklə
+          # 2. Video ve Sesi Yükle
           video = VideoFileClip(background_video)
           audio = AudioFileClip(audio_file)
 
           if video.duration > audio.duration:
             video = video.subclipped(0, audio.duration)
 
-          # 3. Ekrana altyazı əlavə etmək
+          # 3. Alt Yazı Oluşturma
           try:
             txt_clip = TextClip(
                 text=text_input,
-                font_size=45,
+                font_size=40,
                 color="white",
-                bg_color="rgba(0,0,0,0.6)",
-                size=(video.w * 0.9, None),
+                bg_color="black",
+                size=(int(video.w * 0.85), None),
                 method="caption",
             )
             txt_clip = txt_clip.with_duration(audio.duration).with_position(
                 ("center", "center")
             )
 
-            # Videonu altyazı ilə birləşdir
+            # Alt yazıyı videonun üzerine ekle
             video = CompositeVideoClip([video, txt_clip])
           except Exception as txt_err:
-            st.warning(f"Altyazı xəbərdarlığı: {txt_err}")
+            st.warning(f"Alt yazı uyarısı: {txt_err}")
 
-          # 4. Səsi videoya ver
+          # 4. Sesi Videoya Bağla ve Kaydet
           final_video = video.with_audio(audio)
           final_video.write_videofile(
               output_file,
@@ -90,18 +81,18 @@ if st.button("🎥 Altyazılı Video Yarat"):
               logger=None,
           )
 
-          st.success("🎉 Altyazılı və türk səslü video uğurla hazırdır!")
+          st.success("🎉 Alt yazılı ve Türkçe sesli video hazır!")
           st.video(output_file)
 
-          # Endirmə düyməsi
+          # İndirme Butonu
           with open(output_file, "rb") as file:
             st.download_button(
-                label="📥 Videonu yüklə",
+                label="📥 Videoyu İndir",
                 data=file,
                 file_name="ai_short.mp4",
                 mime="video/mp4",
             )
 
         except Exception as e:
-          st.error(f"Xəta baş verdi: {e}")
-        
+          st.error(f"Hata oluştu: {e}")
+          
