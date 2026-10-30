@@ -7,14 +7,13 @@ import streamlit as st
 st.set_page_config(page_title="Shorts AI SaaS", page_icon="🚀")
 
 st.title("🚀 AI Shorts Generator")
-st.write("Türkçe gerçek ses ve ekranda alt yazı ile otomatik video oluşturun!")
+st.write("Dinamik altyazılı və real türk səsli video generatoru!")
 
 text_input = st.text_area(
-    "Videoda seslendirilecek metin (Türkçe):",
-    "1914 yılında iki kardeş, fırtınalı bir gecede denize açıldı. Dalgalar teknelerini alabora ettiğinde herkes onların yok olduğunu sandı. Ancak aylar sonra ıssız bir adada sağ bulundular. Unutma; fırtına ne kadar güçlü olursa olsun, vazgeçmeyen insanı yutamaz!",
+    "Videoda səsləndiriləcək mətn (Türkçe):",
+    "1914 yılında iki kardeş, fırtınalı bir gecede denize açıldı. Dalgalar teknelerini alabora ettiğinde herkes onların yok olduğunu sandı.",
 )
 
-# Türkçe doğal sesler
 voice = st.selectbox(
     "Ses seçin:", ["tr-TR-AhmetNeural", "tr-TR-EmelNeural", "az-AZ-BabekNeural"]
 )
@@ -25,11 +24,13 @@ async def generate_audio(text, voice_name, output_path):
   await communicate.save(output_path)
 
 
-if st.button("🎥 Alt Yazılı Video Oluştur"):
+if st.button("🎥 Dinamik Altyazılı Video Oluştur"):
   if not text_input.strip():
     st.warning("Lütfen bir metin girin!")
   else:
-    with st.spinner("Yapay zeka sesi, alt yazıyı ve videoyu birleştiriyor..."):
+    with st.spinner(
+        "Səs, dinamik altyazı və video sinxronlaşdırılır, gözləyin..."
+    ):
       audio_file = "temp_audio.mp3"
       output_file = "final_output.mp4"
       background_video = "background.mp4"
@@ -40,38 +41,55 @@ if st.button("🎥 Alt Yazılı Video Oluştur"):
             " background.mp4 yükleyin."
         )
       else:
-        # 1. Türkçe Sesi Üret
+        # 1. Səsi yarat
         asyncio.run(generate_audio(text_input, voice, audio_file))
 
         try:
-          # 2. Video ve Sesi Yükle
           video = VideoFileClip(background_video)
           audio = AudioFileClip(audio_file)
 
           if video.duration > audio.duration:
             video = video.subclipped(0, audio.duration)
 
-          # 3. Alt Yazı Oluşturma
-          try:
-            txt_clip = TextClip(
-                text=text_input,
-                font_size=40,
-                color="white",
-                bg_color="black",
-                size=(int(video.w * 0.85), None),
-                method="caption",
-            )
-            txt_clip = txt_clip.with_duration(audio.duration).with_position(
-                ("center", "center")
-            )
+          # Mətni sözlərə bölüb ardıcıl yerləşdiririk (Klassik Shorts effekti)
+          words = text_input.split()
+          clips = [video]
 
-            # Alt yazıyı videonun üzerine ekle
-            video = CompositeVideoClip([video, txt_clip])
-          except Exception as txt_err:
-            st.warning(f"Alt yazı uyarısı: {txt_err}")
+          # Hər bir sözün və ya qrupun ekranda qalma müddəti
+          duration_per_word = audio.duration / max(len(words), 1)
 
-          # 4. Sesi Videoya Bağla ve Kaydet
-          final_video = video.with_audio(audio)
+          # Sadə və səliqəli bloklar halında sözləri ekrana gətiririk
+          chunk_size = 4  # Eyni anda neçə söz görünəcək
+          for i in range(0, len(words), chunk_size):
+            chunk = " ".join(words[i : i + chunk_size])
+            start_time = (i / chunk_size) * (
+                audio.duration / (len(words) / chunk_size)
+            )
+            end_time = min(start_time + (duration_per_word * chunk_size), audio.duration)
+
+            try:
+              txt_clip = (
+                  TextClip(
+                      text=chunk,
+                      font_size=50,
+                      color="white",
+                      stroke_color="black",
+                      stroke_width=2,
+                      method="caption",
+                      size=(int(video.w * 0.9), None),
+                  )
+                  .with_start(start_time)
+                  .with_duration(end_time - start_time)
+                  .with_position(("center", "center"))
+              )
+              clips.append(txt_clip)
+            except Exception:
+              pass
+
+          # Bütün klipləri birləşdiririk
+          final_video = CompositeVideoClip(clips)
+          final_video = final_video.with_audio(audio)
+
           final_video.write_videofile(
               output_file,
               fps=24,
@@ -81,13 +99,12 @@ if st.button("🎥 Alt Yazılı Video Oluştur"):
               logger=None,
           )
 
-          st.success("🎉 Alt yazılı ve Türkçe sesli video hazır!")
+          st.success("🎉 Dinamik altyazılı video hazırdır!")
           st.video(output_file)
 
-          # İndirme Butonu
           with open(output_file, "rb") as file:
             st.download_button(
-                label="📥 Videoyu İndir",
+                label="📥 Videonu İndir",
                 data=file,
                 file_name="ai_short.mp4",
                 mime="video/mp4",
@@ -95,4 +112,4 @@ if st.button("🎥 Alt Yazılı Video Oluştur"):
 
         except Exception as e:
           st.error(f"Hata oluştu: {e}")
-          
+    
