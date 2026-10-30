@@ -2,26 +2,26 @@ import os
 import streamlit as st
 import asyncio
 import edge_tts
-from moviepy import VideoFileClip, AudioFileClip
+from moviepy import VideoFileClip, AudioFileClip, TextClip, CompositeVideoClip
 
 st.set_page_config(page_title="Shorts AI SaaS", page_icon="🚀")
 
 st.title("🚀 AI Shorts Generator (Subway Surfers)")
-st.write("Mətni daxil edin, süni intellekt səsləndirib avtomatik videoya çevirsin!")
+st.write("Mətni daxil edin, real türk səsi və ekranda altyazı ilə avtomatik video yaradın!")
 
-text_input = st.text_area("Videoda səsləndiriləcək mətn:", "Salam dostlar, bu gün süni intellektlə necə video düzəltməyi öyrənirik!")
+text_input = st.text_area("Videoda səsləndiriləcək mətn:", "Hayatta her zaman ileri bakın, çünkü arkaya bakarsanız kaybedersiniz.")
 
-voice = st.selectbox("Səs seçin:", ["az-AZ-BabekNeural", "az-AZ-AidanNeural", "en-US-AriaNeural"])
+voice = st.selectbox("Səs seçin:", ["tr-TR-AhmetNeural", "tr-TR-EmelNeural", "az-AZ-BabekNeural"])
 
 async def generate_audio(text, voice_name, output_path):
-    communicate = edge_tts.Communicate(text, voice_name)
+    communicate = edge_tts.Communicate(text, voice_name, rate="+0%", pitch="+0Hz")
     await communicate.save(output_path)
 
-if st.button("🎥 Video yarat"):
+if st.button("🎥 Altyazılı Video Yarat"):
     if not text_input.strip():
         st.warning("Zəhmət olmasa mətn daxil edin!")
     else:
-        with st.spinner("Süni intellekt səsi və videonu birləşdirir..."):
+        with st.spinner("Süni intellekt səsi, altyazını və videonu birləşdirir..."):
             audio_file = "temp_audio.mp3"
             output_file = "final_output.mp4"
             background_video = "background.mp4"
@@ -32,15 +32,32 @@ if st.button("🎥 Video yarat"):
                 # 1. Səsi yarat
                 asyncio.run(generate_audio(text_input, voice, audio_file))
                 
-                # 2. Videonu və səsi birləşdir
                 try:
+                    # 2. Videonu və səsi yüklə
                     video = VideoFileClip(background_video)
                     audio = AudioFileClip(audio_file)
                     
-                    # Videonun uzunluğunu səsə uyğun qısalt
                     if video.duration > audio.duration:
                         video = video.subclipped(0, audio.duration)
                     
+                    # 3. Ekrana altyazı əlavə etmək
+                    try:
+                        txt_clip = TextClip(
+                            text=text_input,
+                            font_size=40,
+                            color='white',
+                            bg_color='rgba(0,0,0,0.5)',
+                            size=(video.w * 0.9, None),
+                            method='caption'
+                        )
+                        txt_clip = txt_clip.with_duration(audio.duration).with_position(('center', 'center'))
+                        
+                        # Videonu altyazı ilə birləşdir
+                        video = CompositeVideoClip([video, txt_clip])
+                    except Exception as txt_err:
+                        st.warning(f"Altyazı xəbərdarlığı: {txt_err}")
+
+                    # 4. Səsi videoya ver
                     final_video = video.with_audio(audio)
                     final_video.write_videofile(
                         output_file, 
@@ -51,7 +68,7 @@ if st.button("🎥 Video yarat"):
                         logger=None
                     )
                     
-                    st.success("🎉 Video uğurla hazırdır!")
+                    st.success("🎉 Altyazılı video uğurla hazırdır!")
                     st.video(output_file)
                     
                     # Endirmə düyməsi
@@ -65,3 +82,4 @@ if st.button("🎥 Video yarat"):
                         
                 except Exception as e:
                     st.error(f"Xəta baş verdi: {e}")
+    
