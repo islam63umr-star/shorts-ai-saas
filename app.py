@@ -1,5 +1,6 @@
 import asyncio
 import os
+import random
 import edge_tts
 from moviepy import AudioFileClip, CompositeVideoClip, TextClip, VideoFileClip
 import streamlit as st
@@ -7,10 +8,6 @@ import streamlit as st
 st.set_page_config(
     page_title="Shorts AI Studio | Pro Creator", page_icon="✨", layout="centered"
 )
-
-# --- SİSTEM ÜÇÜN NÖVBƏLİ VİDEO SAYĞACI (DÖVRİ SİSTEM) ---
-if "bg_index" not in st.session_state:
-  st.session_state.bg_index = 0
 
 # ---------------------------------------------------------
 # PROFESSIONAL SAAS & PRICING DİZAYNI (TÜRKÇE)
@@ -98,16 +95,14 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
-# İstifadəçiyə dərhal hər şeyin işlədiyini göstərmək üçün sınaq məlumatı:
 st.info(
     "🎁 **Pro Sınaq Rejimi Aktivdir:** Sistemi yoxlamaq üçün bu gün 1 pulsuz"
     " viral video haqqınız var!"
 )
-
 st.markdown("<br>", unsafe_allow_html=True)
 
 # ---------------------------------------------------------
-# ABONELİK PLANLARI (LOKALİZASİYA - TÜRKÇE)
+# ABONELİK PLANLARI (TÜRKÇE)
 # ---------------------------------------------------------
 st.markdown("<h3>💳 Abonelik Planları</h3>", unsafe_allow_html=True)
 col_p1, col_p2 = st.columns(2)
@@ -124,8 +119,7 @@ with col_p1:
       unsafe_allow_html=True,
   )
   st.markdown(
-      "[👉 Pro Paket Satın Al (Test"
-      " Et)](https://lemonsqueezy.com/buy/your-pro-link)",
+      "[👉 Pro Paket Satın Al](https://lemonsqueezy.com/buy/your-pro-link)",
       unsafe_allow_html=True,
   )
 
@@ -149,28 +143,23 @@ st.divider()
 st.markdown("<br>", unsafe_allow_html=True)
 
 # ---------------------------------------------------------
-# VİDEO OLUŞTURMA PANELİ
+# VİDEO OLUŞTURMA PANELİ (TAM BOŞ QUTU)
 # ---------------------------------------------------------
 st.markdown('<div class="main-box">', unsafe_allow_html=True)
 st.markdown(
-    "### 📝 **Adım 1:** Hikayenizi veya Senaryonuzu Yazın",
+    "### 📝 **Adım 1:** Metninizi veya Senaryonuzu Girin",
     unsafe_allow_html=True,
 )
 
-default_story = (
-    "Dünyanın en zengin insanlarının hayatını değiştiren o tek sırrı biliyor"
-    " musun? Çoğu insan sabah uyandığında telefonu eline alır ve saatlerce boş"
-    " boş kaydırarak gününü çöpe atar. Ama o çok başarılı olan %1'lik kesim,"
-    " uyanır uyanmaz zihnini eğitmeye başlar. Bilim insanları kanıtladı: Her gün"
-    " sadece bir dakikanı bile kendi hedeflerine adarsan, bir yılın sonunda"
-    " etrafındaki herkesi geride bırakırsın. Şimdi bu videoyu da diğerleri gibi"
-    " geçip gidecek misin, yoksa kendi imparatorluğunu kuran o %1'lik cesur"
-    " insanlardan biri olacak mısın? Seçim senin. Abone ol ve gücünü herkese"
-    " göster!"
-)
+# Qutu tamamilə boşaldıldı
+default_text = ""
 
 text_input = st.text_area(
-    "Metin:", value=default_story, height=140, label_visibility="collapsed"
+    "Metin:",
+    value=default_text,
+    height=130,
+    placeholder="Buraya kendi senaryonuzu veya metninizi yazın...",
+    label_visibility="collapsed",
 )
 
 st.markdown("<br>", unsafe_allow_html=True)
@@ -211,7 +200,7 @@ if st.button("✨ VİDEOYU SİHİRLİ ŞEKİLDE OLUŞTUR"):
       audio_file = "temp_audio.mp3"
       output_file = "final_output.mp4"
 
-      # --- NÖVBƏLİ (DÖVRİ) VİDEO SEÇİM SİSTEMİ ---
+      # --- TƏKRARLANMAYAN TƏSADÜFİ VİDEO SEÇİM SİSTEMİ ---
       available_bgs = sorted(
           [
               f
@@ -226,15 +215,20 @@ if st.button("✨ VİDEOYU SİHİRLİ ŞEKİLDE OLUŞTUR"):
             " uzantılı videolar yükleyin."
         )
       else:
-        # Hər dəfə növbəti videoya keçir (sıra ilə dövr edir)
-        background_video = available_bgs[
-            st.session_state.bg_index % len(available_bgs)
-        ]
-        st.session_state.bg_index += 1  # Növbəti dəfə sonrakı video seçiləcək
+        candidates = available_bgs
+        if (
+            len(available_bgs) > 1
+            and "last_bg" in st.session_state
+            and st.session_state.last_bg in available_bgs
+        ):
+          candidates = [
+              b for b in available_bgs if b != st.session_state.last_bg
+          ]
 
-        st.info(
-            f"🎬 Arka Plan (Növbəli Sıra): {background_video} istifadə olundu."
-        )
+        background_video = random.choice(candidates)
+        st.session_state.last_bg = background_video
+
+        st.info(f"🎬 Seçilen Arka Plan: {background_video}")
 
         asyncio.run(generate_audio(text_input, voice_code, audio_file))
 
@@ -242,8 +236,16 @@ if st.button("✨ VİDEOYU SİHİRLİ ŞEKİLDE OLUŞTUR"):
           video = VideoFileClip(background_video)
           audio = AudioFileClip(audio_file)
 
+          # --- VİDEONUN TƏSADÜFİ YERİNDƏN KƏSMƏ MƏNTİQİ ---
           if video.duration > audio.duration:
-            video = video.subclipped(0, audio.duration)
+            max_start = video.duration - audio.duration
+            import random as r_time
+
+            start_time = r_time.uniform(0, max_start)
+            end_time = start_time + audio.duration
+            video = video.subclipped(start_time, end_time)
+          else:
+            video = video.subclipped(0, video.duration)
 
           words = text_input.split()
           clips = [video]
