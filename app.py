@@ -9,7 +9,7 @@ st.set_page_config(
 )
 
 # ---------------------------------------------------------
-# PEŞƏKAR SAAS & MODERN DİZAYN (CSS)
+# PEŞƏKAR SAAS & PRICING DİZAYNI (CSS)
 # ---------------------------------------------------------
 st.markdown(
     """
@@ -32,6 +32,15 @@ st.markdown(
         padding: 25px;
         box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
         margin-bottom: 25px;
+    }
+    .pricing-card {
+        background: linear-gradient(145deg, #181d28, #111827);
+        border: 1px solid rgba(168, 85, 247, 0.3);
+        border-radius: 16px;
+        padding: 20px;
+        text-align: center;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+        margin-bottom: 15px;
     }
     .stButton>button {
         background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
@@ -66,39 +75,6 @@ st.markdown(
 )
 
 # ---------------------------------------------------------
-# SIDEBAR - LEMON SQUEEZY & STRIPE ÖDƏNİŞ PLANLARI
-# ---------------------------------------------------------
-with st.sidebar:
-  st.markdown("### ⚡ Shorts AI Studio")
-  st.caption("Next-Gen Video Generation Engine")
-  st.divider()
-
-  st.markdown("#### 💳 Abunəlik Planları")
-  plan = st.selectbox(
-      "Paket Seçin:",
-      [
-          "Pro Creator ($9.99 / 200 Video)",
-          "Unlimited Empire ($29.99 / Sonsuz)",
-      ],
-  )
-
-  if "Pro" in plan:
-    st.info("✨ **Pro Paket:** Ayda 200 viral video, 1080p, təmiz altyazı.")
-    # Bura öz Lemon Squeezy və ya Stripe ödəniş linkini qoyacaqsan:
-    st.markdown(
-        "[👉 Pro Abunə Ol ($9.99)](https://lemonsqueezy.com/buy/your-pro-link)"
-    )
-  else:
-    st.success("🔥 **Unlimited:** Sınırsız video, 7/24 öncəlikli server gücü.")
-    st.markdown(
-        "[👉 Sınırsız Paket Al"
-        " ($29.99)](https://lemonsqueezy.com/buy/your-unlimited-link)"
-    )
-
-  st.divider()
-  st.caption("🔒 256-Bit SSL Secure Checkout")
-
-# ---------------------------------------------------------
 # ANA EKRAN
 # ---------------------------------------------------------
 st.markdown(
@@ -113,14 +89,58 @@ st.markdown(
 )
 st.markdown(
     "<p style='color:#9ca3af; font-size:15px;'>İstədiyiniz mövzuda hekayə"
-    " yazın, qüsursuz senkronize altyazı və təbii süni intellekt səsi ilə"
-    " videonuz hazırdır.</p>",
+    " yazın, qüsursuz altyazı və süni intellekt səsi ilə videonuz hazırdır.</p>",
     unsafe_allow_html=True,
 )
 
 st.markdown("<br>", unsafe_allow_html=True)
 
-# Əsas Giriş Kartı
+# ---------------------------------------------------------
+# ÖDƏNİŞ PLANLARI (BİRBAŞA ANA SƏHİFƏDƏ)
+# ---------------------------------------------------------
+st.markdown("### 💳 Abunəlik Planları (Ödəniş)")
+col_p1, col_p2 = st.columns(2)
+
+with col_p1:
+  st.markdown(
+      """
+        <div class="pricing-card">
+            <h3 style="color: #c084fc; margin-bottom: 5px;">Pro Creator</h3>
+            <h2 style="color: #ffffff; margin-bottom: 15px;">$9.99 <span style="font-size: 14px; color: #9ca3af;">/ ay</span></h2>
+            <p style="color: #9ca3af; font-size: 13px;">Ayda 200 viral video, 1080p keyfiyyət və təmiz altyazı.</p>
+        </div>
+        """,
+      unsafe_allow_html=True,
+  )
+  # Lemon Squeezy Pro Linkini bura qoyacaqsan:
+  st.markdown(
+      "[👉 Pro Paket Al](https://lemonsqueezy.com/buy/your-pro-link)",
+      unsafe_allow_html=True,
+  )
+
+with col_p2:
+  st.markdown(
+      """
+        <div class="pricing-card">
+            <h3 style="color: #38bdf8; margin-bottom: 5px;">Unlimited</h3>
+            <h2 style="color: #ffffff; margin-bottom: 15px;">$29.99 <span style="font-size: 14px; color: #9ca3af;">/ ay</span></h2>
+            <p style="color: #9ca3af; font-size: 13px;">Sınırsız video istehsalı, 7/24 öncəlikli server gücü.</p>
+        </div>
+        """,
+      unsafe_allow_html=True,
+  )
+  # Lemon Squeezy Unlimited Linkini bura qoyacaqsan:
+  st.markdown(
+      "[👉 Sınırsız Al](https://lemonsqueezy.com/buy/your-unlimited-link)",
+      unsafe_allow_html=True,
+  )
+
+st.divider()
+st.markdown("<br>", unsafe_allow_html=True)
+
+# ---------------------------------------------------------
+# VİDEO YARATMA PANELİ
+# ---------------------------------------------------------
 st.markdown('<div class="main-box">', unsafe_allow_html=True)
 st.markdown(
     "### 📝 **Addım 1:** Hekayənizi və ya Ssenarinizi Yazın",
