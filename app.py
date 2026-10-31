@@ -1,5 +1,6 @@
 import asyncio
 import os
+import random
 import edge_tts
 from moviepy import AudioFileClip, CompositeVideoClip, TextClip, VideoFileClip
 import streamlit as st
@@ -9,7 +10,7 @@ st.set_page_config(
 )
 
 # ---------------------------------------------------------
-# PEŞƏKAR SAAS & PRICING DİZAYNI (CSS)
+# PROFESSIONAL SAAS & PRICING DİZAYNI (TÜRKÇE)
 # ---------------------------------------------------------
 st.markdown(
     """
@@ -75,7 +76,7 @@ st.markdown(
 )
 
 # ---------------------------------------------------------
-# ANA EKRAN
+# ANA EKRAN (TÜRKÇE)
 # ---------------------------------------------------------
 st.markdown(
     '<div><span class="badge">✨ AI-POWERED VIRAL SHORTS ENGINE</span></div>',
@@ -83,22 +84,23 @@ st.markdown(
 )
 st.markdown(
     "<h1"
-    " style='font-size:32px; font-weight:800; margin-bottom:5px;'>Saniyələr"
-    " İçində Viral Short'lar Üretin</h1>",
+    " style='font-size:32px; font-weight:800; margin-bottom:5px;'>Saniyeler"
+    " İçinde Viral Short'lar Üretin</h1>",
     unsafe_allow_html=True,
 )
 st.markdown(
-    "<p style='color:#9ca3af; font-size:15px;'>İstədiyiniz mövzuda hekayə"
-    " yazın, qüsursuz altyazı və süni intellekt səsi ilə videonuz hazırdır.</p>",
+    "<p style='color:#9ca3af; font-size:15px;'>İstediğiniz konuyu yazın,"
+    " kusursuz altyazı ve yapay zeka seslendirmesi ile videonuz saniyeler içinde"
+    " hazırdır.</p>",
     unsafe_allow_html=True,
 )
 
 st.markdown("<br>", unsafe_allow_html=True)
 
 # ---------------------------------------------------------
-# ÖDƏNİŞ PLANLARI (BİRBAŞA ANA SƏHİFƏDƏ)
+# ABONELİK PLANLARI (LOKALİZASİYA - TÜRKÇE)
 # ---------------------------------------------------------
-st.markdown("### 💳 Abunəlik Planları (Ödəniş)")
+st.markdown("<h3>💳 Abonelik Planları</h3>", unsafe_allow_html=True)
 col_p1, col_p2 = st.columns(2)
 
 with col_p1:
@@ -107,14 +109,13 @@ with col_p1:
         <div class="pricing-card">
             <h3 style="color: #c084fc; margin-bottom: 5px;">Pro Creator</h3>
             <h2 style="color: #ffffff; margin-bottom: 15px;">$9.99 <span style="font-size: 14px; color: #9ca3af;">/ ay</span></h2>
-            <p style="color: #9ca3af; font-size: 13px;">Ayda 200 viral video, 1080p keyfiyyət və təmiz altyazı.</p>
+            <p style="color: #9ca3af; font-size: 13px;">Ayda 200 viral video, 1080p kalite ve profesyonel altyazı.</p>
         </div>
         """,
       unsafe_allow_html=True,
   )
-  # Lemon Squeezy Pro Linkini bura qoyacaqsan:
   st.markdown(
-      "[👉 Pro Paket Al](https://lemonsqueezy.com/buy/your-pro-link)",
+      "[👉 Pro Paket Satın Al](https://lemonsqueezy.com/buy/your-pro-link)",
       unsafe_allow_html=True,
   )
 
@@ -124,14 +125,14 @@ with col_p2:
         <div class="pricing-card">
             <h3 style="color: #38bdf8; margin-bottom: 5px;">Unlimited</h3>
             <h2 style="color: #ffffff; margin-bottom: 15px;">$29.99 <span style="font-size: 14px; color: #9ca3af;">/ ay</span></h2>
-            <p style="color: #9ca3af; font-size: 13px;">Sınırsız video istehsalı, 7/24 öncəlikli server gücü.</p>
+            <p style="color: #9ca3af; font-size: 13px;">Sınırsız video üretimi, 7/24 öncelikli yüksek sunucu gücü.</p>
         </div>
         """,
       unsafe_allow_html=True,
   )
-  # Lemon Squeezy Unlimited Linkini bura qoyacaqsan:
   st.markdown(
-      "[👉 Sınırsız Al](https://lemonsqueezy.com/buy/your-unlimited-link)",
+      "[👉 Sınırsız Paket Satın"
+      " Al](https://lemonsqueezy.com/buy/your-unlimited-link)",
       unsafe_allow_html=True,
   )
 
@@ -139,16 +140,16 @@ st.divider()
 st.markdown("<br>", unsafe_allow_html=True)
 
 # ---------------------------------------------------------
-# VİDEO YARATMA PANELİ
+# VİDEO OLUŞTURMA PANELİ
 # ---------------------------------------------------------
 st.markdown('<div class="main-box">', unsafe_allow_html=True)
 st.markdown(
-    "### 📝 **Addım 1:** Hekayənizi və ya Ssenarinizi Yazın",
+    "### 📝 **Adım 1:** Hikayenizi veya Senaryonuzu Yazın",
     unsafe_allow_html=True,
 )
 
 text_input = st.text_area(
-    "Mətn:",
+    "Metin:",
     value=(
         "Biliyor musun? Gece yarısı odasında tek başına oturup hayalleri için"
         " savaşan insanları asla küçümseme. Onlar dışarıdan yalnız görünürler"
@@ -160,16 +161,16 @@ text_input = st.text_area(
 
 st.markdown("<br>", unsafe_allow_html=True)
 st.markdown(
-    "### 🎙️ **Addım 2:** Səs və Dizayn Parametrləri", unsafe_allow_html=True
+    "### 🎙️ **Adım 2:** Ses ve Tasarım Ayarları", unsafe_allow_html=True
 )
 
 col1, col2 = st.columns(2)
 with col1:
   voice = st.selectbox(
-      "Səs Modeli:", ["tr-TR-EmelNeural (Canlı Kadın)", "tr-TR-AhmetNeural (Erkek)"]
+      "Ses Modeli:", ["tr-TR-EmelNeural (Canlı Kadın)", "tr-TR-AhmetNeural (Erkek)"]
   )
 with col2:
-  font_size = st.slider("Altyazı Font Ölçüsü:", 30, 50, 40)
+  font_size = st.slider("Altyazı Font Boyutu:", 30, 50, 40)
 
 st.markdown("</div>", unsafe_allow_html=True)
 
@@ -185,23 +186,34 @@ async def generate_audio(text, voice_name, output_path):
   await communicate.save(output_path)
 
 
-if st.button("✨ VİDEOYU SİHİRLİ ŞEKİLDƏ YARAT"):
+if st.button("✨ VİDEOYU SİHİRLİ ŞEKİLDE OLUŞTUR"):
   if not text_input.strip():
-    st.warning("Zəhmət olmasa bir mətn daxil edin!")
+    st.warning("Lütfen bir metin girin!")
   else:
     with st.spinner(
-        "🚀 Sİ işləyir: Səs sinxronlaşdırılır, altyazılar yazılır..."
+        "🚀 Yapay zeka çalışıyor: Ses senkronize ediliyor, altyazılar"
+        " işleniyor..."
     ):
       audio_file = "temp_audio.mp3"
       output_file = "final_output.mp4"
-      background_video = "background.mp4"
 
-      if not os.path.exists(background_video):
+      # --- RANDOM FON VİDEOSU SEÇİMİ ---
+      # GitHub-a yüklədiyin fon videolarının adlarını bura əlavə edə bilərsən:
+      possible_backgrounds = [
+          "background1.mp4",
+          "background2.mp4",
+          "background3.mp4",
+          "background.mp4",
+      ]
+      available_bgs = [bg for bg in possible_backgrounds if os.path.exists(bg)]
+
+      if not available_bgs:
         st.error(
-            "Xəta: 'background.mp4' faylı tapılmadı! Zəhmət olmasa GitHub-a"
-            " yükləyin."
+            "Hata: Sunucuda hiç fon videosu bulunamadı! Lütfen GitHub'a en az"
+            " bir 'background.mp4' veya 'background1.mp4' yükleyin."
         )
       else:
+        background_video = random.choice(available_bgs)
         asyncio.run(generate_audio(text_input, voice_code, audio_file))
 
         try:
@@ -257,12 +269,12 @@ if st.button("✨ VİDEOYU SİHİRLİ ŞEKİLDƏ YARAT"):
           )
 
           st.markdown('<div class="main-box">', unsafe_allow_html=True)
-          st.success("🎉 Videonuz uğurla hazırlandı!")
+          st.success("🎉 Videonuz başarıyla oluşturuldu!")
           st.video(output_file)
 
           with open(output_file, "rb") as file:
             st.download_button(
-                label="📥 VİDEONU ENDİR (1080P)",
+                label="📥 VİDEOYU İNDİR (1080P)",
                 data=file,
                 file_name="viral_short_pro.mp4",
                 mime="video/mp4",
@@ -270,4 +282,4 @@ if st.button("✨ VİDEOYU SİHİRLİ ŞEKİLDƏ YARAT"):
           st.markdown("</div>", unsafe_allow_html=True)
 
         except Exception as e:
-          st.error(f"Xəta baş verdi: {e}")
+          st.error(f"Hata oluştu: {e}")
