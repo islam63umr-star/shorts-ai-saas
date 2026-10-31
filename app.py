@@ -9,6 +9,10 @@ st.set_page_config(
     page_title="Shorts AI Studio | Pro Creator", page_icon="✨", layout="centered"
 )
 
+# --- İSTİFADƏÇİNİN PULSUZ VİDEO HAQQI (1 HAK) ---
+if "free_credits" not in st.session_state:
+  st.session_state.free_credits = 1
+
 # ---------------------------------------------------------
 # PROFESSIONAL SAAS & PRICING DİZAYNI (TÜRKÇE)
 # ---------------------------------------------------------
@@ -76,7 +80,7 @@ st.markdown(
 )
 
 # ---------------------------------------------------------
-# ANA EKRAN & TEST HƏDİYYƏ BİLDİRİŞİ
+# ANA EKRAN & PULSUZ HAQQ BİLDİRİŞİ
 # ---------------------------------------------------------
 st.markdown(
     '<div><span class="badge">✨ AI-POWERED VIRAL SHORTS ENGINE</span></div>',
@@ -95,16 +99,23 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
-st.info(
-    "🎁 **Pro Sınaq Rejimi Aktivdir:** Sistemi yoxlamaq üçün bu gün 1 pulsuz"
-    " viral video haqqınız var!"
-)
+if st.session_state.free_credits > 0:
+  st.info(
+      f"🎁 **Sınaq Rejimi:** Sizin bu gün **{st.session_state.free_credits}**"
+      " pulsuz video haqqınız var!"
+  )
+else:
+  st.warning(
+      "⚠️ Pulsuz video haqqınız bitdi! Sınırsız video istehsal etmək üçün"
+      " aşağıdan paket seçə bilərsiniz."
+  )
+
 st.markdown("<br>", unsafe_allow_html=True)
 
 # ---------------------------------------------------------
-# ABONELİK PLANLARI (TÜRKÇE)
+# ABONELİK PLANLARI (LEMON SQUEEZY LİNKLƏRİ İLƏ)
 # ---------------------------------------------------------
-st.markdown("<h3>💳 Abonelik Planları</h3>", unsafe_allow_html=True)
+st.markdown("<h3>💳 Abonelik Planları (Pro / Unlimited)</h3>", unsafe_allow_html=True)
 col_p1, col_p2 = st.columns(2)
 
 with col_p1:
@@ -118,8 +129,10 @@ with col_p1:
         """,
       unsafe_allow_html=True,
   )
+  # BURA ÖZ LEMON SQUEEZY LİNKİNİ YAZACAQSAN (Məsələn: https://seninmagazan.lemonsqueezy.com/buy/...)
   st.markdown(
-      "[👉 Pro Paket Satın Al](https://lemonsqueezy.com/buy/your-pro-link)",
+      "[👉 Pro Paket Satın"
+      " Al](https://lemonsqueezy.com/buy/YOUR_PRO_CHECKOUT_ID)",
       unsafe_allow_html=True,
   )
 
@@ -134,8 +147,10 @@ with col_p2:
         """,
       unsafe_allow_html=True,
   )
+  # BURA DA UNLIMITED LİNKİNİ YAZACAQSAN
   st.markdown(
-      "[👉 Sınırsız Paket Satın Al](https://lemonsqueezy.com/buy/your-unlimited-link)",
+      "[👉 Sınırsız Paket Satın"
+      " Al](https://lemonsqueezy.com/buy/YOUR_UNLIMITED_CHECKOUT_ID)",
       unsafe_allow_html=True,
   )
 
@@ -143,7 +158,7 @@ st.divider()
 st.markdown("<br>", unsafe_allow_html=True)
 
 # ---------------------------------------------------------
-# VİDEO OLUŞTURMA PANELİ (TAM BOŞ QUTU)
+# VİDEO OLUŞTURMA PANELİ
 # ---------------------------------------------------------
 st.markdown('<div class="main-box">', unsafe_allow_html=True)
 st.markdown(
@@ -151,12 +166,9 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
-# Qutu tamamilə boşaldıldı
-default_text = ""
-
 text_input = st.text_area(
     "Metin:",
-    value=default_text,
+    value="",
     height=130,
     placeholder="Buraya kendi senaryonuzu veya metninizi yazın...",
     label_visibility="collapsed",
@@ -190,7 +202,12 @@ async def generate_audio(text, voice_name, output_path):
 
 
 if st.button("✨ VİDEOYU SİHİRLİ ŞEKİLDE OLUŞTUR"):
-  if not text_input.strip():
+  if st.session_state.free_credits <= 0:
+    st.error(
+        "⚠️ Ücretsiz kullanım hakkınız kalmamıştır! Lütfen yukarıdaki paketlerden"
+        " birini satın alın."
+    )
+  elif not text_input.strip():
     st.warning("Lütfen bir metin girin!")
   else:
     with st.spinner(
@@ -200,7 +217,7 @@ if st.button("✨ VİDEOYU SİHİRLİ ŞEKİLDE OLUŞTUR"):
       audio_file = "temp_audio.mp3"
       output_file = "final_output.mp4"
 
-      # --- TƏKRARLANMAYAN TƏSADÜFİ VİDEO SEÇİM SİSTEMİ ---
+      # --- UZUN VİDEOLARI QOŞMAMAQ ÜÇÜN FİLTR (YALNIZ QISA VİDEOLAR) ---
       available_bgs = sorted(
           [
               f
@@ -236,7 +253,6 @@ if st.button("✨ VİDEOYU SİHİRLİ ŞEKİLDE OLUŞTUR"):
           video = VideoFileClip(background_video)
           audio = AudioFileClip(audio_file)
 
-          # --- VİDEONUN TƏSADÜFİ YERİNDƏN KƏSMƏ MƏNTİQİ ---
           if video.duration > audio.duration:
             max_start = video.duration - audio.duration
             import random as r_time
@@ -291,6 +307,9 @@ if st.button("✨ VİDEOYU SİHİRLİ ŞEKİLDE OLUŞTUR"):
               preset="ultrafast",
               logger=None,
           )
+
+          # Video uğurla yaradıldıqdan sonra pulsuz haqqı 1 azaldırıq
+          st.session_state.free_credits -= 1
 
           st.markdown('<div class="main-box">', unsafe_allow_html=True)
           st.success("🎉 Videonuz başarıyla oluşturuldu!")
