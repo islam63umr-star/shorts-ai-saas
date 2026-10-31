@@ -115,41 +115,43 @@ st.markdown("<br>", unsafe_allow_html=True)
 # ---------------------------------------------------------
 # ABONELİK PLANLARI (LEMON SQUEEZY LİNKLƏRİ İLƏ)
 # ---------------------------------------------------------
-st.markdown("<h3>💳 Abonelik Planları (Pro / Unlimited)</h3>", unsafe_allow_html=True)
+st.markdown("<h3>💳 Abonelik Planları (Starter / Pro)</h3>", unsafe_allow_html=True)
 col_p1, col_p2 = st.columns(2)
 
 with col_p1:
   st.markdown(
       """
         <div class="pricing-card">
-            <h3 style="color: #c084fc; margin-bottom: 5px;">Pro Creator</h3>
-            <h2 style="color: #ffffff; margin-bottom: 15px;">$9.99 <span style="font-size: 14px; color: #9ca3af;">/ ay</span></h2>
-            <p style="color: #9ca3af; font-size: 13px;">Ayda 200 viral video, 1080p kalite ve profesyonel altyazı.</p>
+            <h3 style="color: #c084fc; margin-bottom: 5px;">Starter Plan</h3>
+            <h2 style="color: #ffffff; margin-bottom: 15px;">$9.99 <span style="font-size: 14px; color: #9ca3af;">/ bir dəfəlik</span></h2>
+            <p style="color: #9ca3af; font-size: 13px;">Əsas AI video yaratma imkanlarına çıxış.</p>
         </div>
         """,
       unsafe_allow_html=True,
   )
-  st.markdown(
-      "[👉 Pro Paket Satın"
-      " Al](https://lemonsqueezy.com/buy/YOUR_PRO_CHECKOUT_ID)",
-      unsafe_allow_html=True,
+  st.link_button(
+      "👉 Starter Plan Satın Al",
+      "https://shortsai.lemonsqueezy.com/checkout/buy/b9834fd0-be33-4377-85b7-47da685d2df1",
+      type="secondary",
+      use_container_width=True,
   )
 
 with col_p2:
   st.markdown(
       """
         <div class="pricing-card">
-            <h3 style="color: #38bdf8; margin-bottom: 5px;">Unlimited</h3>
-            <h2 style="color: #ffffff; margin-bottom: 15px;">$29.99 <span style="font-size: 14px; color: #9ca3af;">/ ay</span></h2>
-            <p style="color: #9ca3af; font-size: 13px;">Sınırsız video üretimi, 7/24 öncelikli yüksek sunucu gücü.</p>
+            <h3 style="color: #38bdf8; margin-bottom: 5px;">Pro Plan</h3>
+            <h2 style="color: #ffffff; margin-bottom: 15px;">$29.99 <span style="font-size: 14px; color: #9ca3af;">/ bir dəfəlik</span></h2>
+            <p style="color: #9ca3af; font-size: 13px;">Bütün AI video funksiyalarına limitsiz çıxış.</p>
         </div>
         """,
       unsafe_allow_html=True,
   )
-  st.markdown(
-      "[👉 Sınırsız Paket Satın"
-      " Al](https://lemonsqueezy.com/buy/YOUR_UNLIMITED_CHECKOUT_ID)",
-      unsafe_allow_html=True,
+  st.link_button(
+      "👉 Pro Plan Satın Al",
+      "https://shortsai.lemonsqueezy.com/checkout/buy/39b5d7c7-4b5e-47b1-a29a-248e682ea857",
+      type="primary",
+      use_container_width=True,
   )
 
 st.divider()
@@ -215,7 +217,6 @@ if st.button("✨ VİDEOYU SİHİRLİ ŞEKİLDE OLUŞTUR"):
       audio_file = "temp_audio.mp3"
       output_file = "final_output.mp4"
 
-      # --- TƏKRARLANMAYAN FƏRQLİ VİDEO SEÇİM SİSTEMİ ---
       available_bgs = sorted(
           [
               f
@@ -279,8 +280,8 @@ if st.button("✨ VİDEOYU SİHİRLİ ŞEKİLDE OLUŞTUR"):
                       text=chunk,
                       font="DejaVuSans-Bold",
                       font_size=font_size,
-                      color="white",  # Rəng ağ rəfə dəyişdirildi
-                      stroke_color="black",  # Oxunaqlı olması üçün qara haşiyə
+                      color="white",
+                      stroke_color="black",
                       stroke_width=2,
                       method="caption",
                       size=(int(video.w * 0.85), None),
@@ -323,4 +324,3 @@ if st.button("✨ VİDEOYU SİHİRLİ ŞEKİLDE OLUŞTUR"):
 
         except Exception as e:
           st.error(f"Hata oluştu: {e}")
-    
