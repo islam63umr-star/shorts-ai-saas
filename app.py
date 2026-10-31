@@ -129,7 +129,6 @@ with col_p1:
         """,
       unsafe_allow_html=True,
   )
-  # BURA ÖZ LEMON SQUEEZY LİNKİNİ YAZACAQSAN (Məsələn: https://seninmagazan.lemonsqueezy.com/buy/...)
   st.markdown(
       "[👉 Pro Paket Satın"
       " Al](https://lemonsqueezy.com/buy/YOUR_PRO_CHECKOUT_ID)",
@@ -147,7 +146,6 @@ with col_p2:
         """,
       unsafe_allow_html=True,
   )
-  # BURA DA UNLIMITED LİNKİNİ YAZACAQSAN
   st.markdown(
       "[👉 Sınırsız Paket Satın"
       " Al](https://lemonsqueezy.com/buy/YOUR_UNLIMITED_CHECKOUT_ID)",
@@ -217,7 +215,7 @@ if st.button("✨ VİDEOYU SİHİRLİ ŞEKİLDE OLUŞTUR"):
       audio_file = "temp_audio.mp3"
       output_file = "final_output.mp4"
 
-      # --- UZUN VİDEOLARI QOŞMAMAQ ÜÇÜN FİLTR (YALNIZ QISA VİDEOLAR) ---
+      # --- TƏKRARLANMAYAN FƏRQLİ VİDEO SEÇİM SİSTEMİ ---
       available_bgs = sorted(
           [
               f
@@ -281,8 +279,8 @@ if st.button("✨ VİDEOYU SİHİRLİ ŞEKİLDE OLUŞTUR"):
                       text=chunk,
                       font="DejaVuSans-Bold",
                       font_size=font_size,
-                      color="yellow",
-                      stroke_color="black",
+                      color="white",  # Rəng ağ rəfə dəyişdirildi
+                      stroke_color="black",  # Oxunaqlı olması üçün qara haşiyə
                       stroke_width=2,
                       method="caption",
                       size=(int(video.w * 0.85), None),
@@ -308,7 +306,6 @@ if st.button("✨ VİDEOYU SİHİRLİ ŞEKİLDE OLUŞTUR"):
               logger=None,
           )
 
-          # Video uğurla yaradıldıqdan sonra pulsuz haqqı 1 azaldırıq
           st.session_state.free_credits -= 1
 
           st.markdown('<div class="main-box">', unsafe_allow_html=True)
@@ -326,3 +323,4 @@ if st.button("✨ VİDEOYU SİHİRLİ ŞEKİLDE OLUŞTUR"):
 
         except Exception as e:
           st.error(f"Hata oluştu: {e}")
+    
