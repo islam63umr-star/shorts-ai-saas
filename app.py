@@ -148,15 +148,20 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
+# Sənin istədiyin uşaqları abunə olmağa vadar edən hazır maraqlı hekayə şablonu:
+default_story = (
+    "Bir zamanlar ormanda küçük bir tavşan varmış. Herkes onun çok hızlı"
+    " koştuğunu sanırmış ama onun asıl gizli gücü, hiç kimsenin göremediği"
+    " sihirli butonları bulabilmesiymiş. Psikologlar diyor ki: İnsanların 99’u"
+    " bu videoyu izleyip geçer. Ama sadece kalbi sevgi dolu ve gerçekten zeki"
+    " olan %1'lik grup ekrana iki kere dokunup Beğen butonuna basar ve kanala"
+    " abone olur! Şimdi dürüst ol... Sen o sıradan izleyicilerden misin, yoksa"
+    " akıllı tavşanın seçtiği %1'lik özel kahramanlardan mı? Abone ol ve gücünü"
+    " kanıtla!"
+)
+
 text_input = st.text_area(
-    "Metin:",
-    value=(
-        "Biliyor musun? Gece yarısı odasında tek başına oturup hayalleri için"
-        " savaşan insanları asla küçümseme. Onlar dışarıdan yalnız görünürler"
-        " ama aslında kendi imparatorluklarını kuruyorlar..."
-    ),
-    height=120,
-    label_visibility="collapsed",
+    "Metin:", value=default_story, height=140, label_visibility="collapsed"
 )
 
 st.markdown("<br>", unsafe_allow_html=True)
@@ -197,23 +202,22 @@ if st.button("✨ VİDEOYU SİHİRLİ ŞEKİLDE OLUŞTUR"):
       audio_file = "temp_audio.mp3"
       output_file = "final_output.mp4"
 
-      # --- RANDOM FON VİDEOSU SEÇİMİ ---
-      # GitHub-a yüklədiyin fon videolarının adlarını bura əlavə edə bilərsən:
-      possible_backgrounds = [
-          "background1.mp4",
-          "background2.mp4",
-          "background3.mp4",
-          "background.mp4",
+      # --- QOVLUQDAKI BÜTÜN VİDEOLARI AVTOMATİK TAPIB RANDOM SEÇən HİSSƏ ---
+      available_bgs = [
+          f
+          for f in os.listdir(".")
+          if f.endswith(".mp4") and f != "final_output.mp4"
       ]
-      available_bgs = [bg for bg in possible_backgrounds if os.path.exists(bg)]
 
       if not available_bgs:
         st.error(
-            "Hata: Sunucuda hiç fon videosu bulunamadı! Lütfen GitHub'a en az"
-            " bir 'background.mp4' veya 'background1.mp4' yükleyin."
+            "Hata: Sunucuda hiç fon videosu bulunamadı! Lütfen GitHub'a .mp4"
+            " uzantılı videolar yükleyin."
         )
       else:
         background_video = random.choice(available_bgs)
+        st.info(f"🎬 Seçilen Arka Plan: {background_video}")
+
         asyncio.run(generate_audio(text_input, voice_code, audio_file))
 
         try:
@@ -283,3 +287,4 @@ if st.button("✨ VİDEOYU SİHİRLİ ŞEKİLDE OLUŞTUR"):
 
         except Exception as e:
           st.error(f"Hata oluştu: {e}")
+    
