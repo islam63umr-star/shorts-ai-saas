@@ -1,4 +1,5 @@
 import asyncio
+import json
 import os
 import random
 import edge_tts
@@ -9,25 +10,31 @@ st.set_page_config(
     page_title="Shorts AI Studio | Pro Creator", page_icon="✨", layout="centered"
 )
 
-# --- İSTİFADƏÇİ SESSİYA VƏ ABUNƏLİK BAZASI ---
-if "user_email" not in st.session_state:
-  st.session_state.user_email = ""
+# --- İSTİFADƏÇİ MƏLUMATLARINI SAXLAMAQ ÜÇÜN SADƏ BAZA (JSON) ---
+DB_FILE = "users_db.json"
 
-if "credits" not in st.session_state:
-  # Hər istifadəçi üçün başlanğıcda 1 pulsuz haqq
-  st.session_state.credits = 1
 
-if "is_pro" not in st.session_state:
-  st.session_state.is_pro = False
+def load_db():
+  if os.path.exists(DB_FILE):
+    try:
+      with open(DB_FILE, "r") as f:
+        return json.load(f)
+    except:
+      return {}
+  return {}
 
-# --- LEMON SQUEEZY WEBHOOK / URL QUERY PARAMETR YOXLANIŞI ---
-# İstifadəçi ödəniş edib qayıdanda URL-də ?success=true və ya ?email=... gələ bilər
+
+def save_db(db):
+  with open(DB_FILE, "w") as f:
+    json.dump(db, f)
+
+
+# --- URL QUERY VƏ ÖDƏNİŞ YOXLANIŞI ---
 query_params = st.query_params
 if "success" in query_params and query_params["success"] == "true":
-  st.session_state.is_pro = True
-  st.session_state.credits = 999  # Pro istifadəçiyə yüksək haqq
   st.success(
-      "🎉 Ödənişiniz uğurla təsdiqləndi! Hesabınız Pro statusuna yüksəldildi."
+      "🎉 Ödənişiniz uğurla təsdiqləndi! Zəhmət olmasa aşağıdan e-poçtunuzu"
+      " daxil edin ki, Pro statusunuz aktivləşsin."
   )
 
 # ---------------------------------------------------------
@@ -97,7 +104,7 @@ st.markdown(
 )
 
 # ---------------------------------------------------------
-# ANA EKRAN & KULLANICI BİLGİSİ
+# ANA EKRAN & KULLANICI E-POSTA GİRİŞİ
 # ---------------------------------------------------------
 st.markdown(
     '<div><span class="badge">✨ AI-POWERED VIRAL SHORTS ENGINE</span></div>',
@@ -116,20 +123,47 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
-# İstifadəçi statusu paneli
+# İstifadəçi e-poçtunu daxil edir ki, haqqı yadda qalsın
 col_stat1, col_stat2 = st.columns([2, 1])
 with col_stat1:
-  user_email_input = st.text_input(
-      "E-Posta Adresiniz (Ödeme takibi için):",
-      value=st.session_state.user_email,
+  user_email = st.text_input(
+      "E-Posta Adresiniz (Hakkınızı korumak için gereklidir):",
       placeholder="ornek@gmail.com",
   )
-  if user_email_input != st.session_state.user_email:
-    st.session_state.user_email = user_email_input
+
+db = load_db()
+
+current_credits = 1
+is_pro_user = False
+
+if user_email and "@" in user_email:
+  user_email = user_email.strip().lower()
+  if user_email not in db:
+    # Yeni istifadəçiyə 1 pulsuz haqq veririk və bazaya yazırıq
+    db[user_email] = {"credits": 1, "is_pro": False}
+    save_db(db)
+
+  current_credits = db[user_email]["credits"]
+  is_pro_user = db[user_email]["is_pro"]
+
+  # Əgər URL-də success=true gəlibsə, bu istifadəçini Pro edək
+  if "success" in query_params and query_params["success"] == "true":
+    db[user_email]["is_pro"] = True
+    db[user_email]["credits"] = 999
+    save_db(db)
+    is_pro_user = True
+    current_credits = 999
 
 with col_stat2:
   st.markdown("<br>", unsafe_allow_html=True)
-  if st.session_state.is_pro:
+  if not user_email:
+    st.markdown(
+        "<div style='background:#374151; color:#f3f4f6; padding:10px;"
+        " border-radius:10px; text-align:center; font-size:13px;'>📧 E-posta"
+        " girin</div>",
+        unsafe_allow_html=True,
+    )
+  elif is_pro_user:
     st.markdown(
         "<div style='background:#065f46; color:#34d399; padding:10px;"
         " border-radius:10px; text-align:center; font-weight:bold;'>👑 PRO"
@@ -140,7 +174,7 @@ with col_stat2:
     st.markdown(
         f"<div style='background:#1f2937; color:#fbbf24; padding:10px;"
         f" border-radius:10px; text-align:center; font-weight:bold;'>🎁 Kalan"
-        f" Hak: {st.session_state.credits}</div>",
+        f" Hak: {current_credits}</div>",
         unsafe_allow_html=True,
     )
 
@@ -152,13 +186,7 @@ st.markdown("<br>", unsafe_allow_html=True)
 st.markdown("<h3>💳 Abonelik Planları (Starter / Pro)</h3>", unsafe_allow_html=True)
 col_p1, col_p2 = st.columns(2)
 
-# Qeyd: Lemon Squeezy linklərinə yönləndirərkən istifadəçi e-postasını avtometrik ötürmək üçün ?checkout[email]=... əlavə edə bilərik
-email_param = (
-    f"?checkout[email]={st.session_state.user_email}"
-    if st.session_state.user_email
-    else ""
-)
-
+email_param = f"?checkout[email]={user_email}" if user_email else ""
 starter_link = (
     "https://shortsai.lemonsqueezy.com/checkout/buy/b9834fd0-be33-4377-85b7-47da685d2df1"
     + email_param
@@ -252,7 +280,9 @@ async def generate_audio(text, voice_name, output_path):
 
 
 if st.button("✨ VİDEOYU SİHİRLİ ŞEKİLDE OLUŞTUR"):
-  if st.session_state.credits <= 0 and not st.session_state.is_pro:
+  if not user_email or "@" not in user_email:
+    st.warning("⚠️ Lütfen video üretmeden önce yukarıya e-posta adresinizi yazın!")
+  elif current_credits <= 0 and not is_pro_user:
     st.error(
         "⚠️ Ücretsiz kullanım hakkınız kalmamıştır! Lütfen yukarıdaki paketlerden"
         " birini satın alın."
@@ -293,8 +323,6 @@ if st.button("✨ VİDEOYU SİHİRLİ ŞEKİLDE OLUŞTUR"):
 
         background_video = random.choice(candidates)
         st.session_state.last_bg = background_video
-
-        st.info(f"🎬 Seçilen Arka Plan: {background_video}")
 
         asyncio.run(generate_audio(text_input, voice_code, audio_file))
 
@@ -357,9 +385,10 @@ if st.button("✨ VİDEOYU SİHİRLİ ŞEKİLDE OLUŞTUR"):
               logger=None,
           )
 
-          # Əgər Pro deyilsə, haqqını 1 azaldırıq
-          if not st.session_state.is_pro:
-            st.session_state.credits -= 1
+          # Əgər Pro deyilsə, haqqını 1 azaldıb bazada yadda saxlayırıq
+          if not is_pro_user:
+            db[user_email]["credits"] -= 1
+            save_db(db)
 
           st.markdown('<div class="main-box">', unsafe_allow_html=True)
           st.success("🎉 Videonuz başarıyla oluşturuldu!")
@@ -376,4 +405,3 @@ if st.button("✨ VİDEOYU SİHİRLİ ŞEKİLDE OLUŞTUR"):
 
         except Exception as e:
           st.error(f"Hata oluştu: {e}")
-    
