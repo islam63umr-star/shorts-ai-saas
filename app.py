@@ -9,9 +9,26 @@ st.set_page_config(
     page_title="Shorts AI Studio | Pro Creator", page_icon="✨", layout="centered"
 )
 
-# --- İSTİFADƏÇİNİN PULSUZ VİDEO HAQQI (1 HAK) ---
-if "free_credits" not in st.session_state:
-  st.session_state.free_credits = 1
+# --- İSTİFADƏÇİ SESSİYA VƏ ABUNƏLİK BAZASI ---
+if "user_email" not in st.session_state:
+  st.session_state.user_email = ""
+
+if "credits" not in st.session_state:
+  # Hər istifadəçi üçün başlanğıcda 1 pulsuz haqq
+  st.session_state.credits = 1
+
+if "is_pro" not in st.session_state:
+  st.session_state.is_pro = False
+
+# --- LEMON SQUEEZY WEBHOOK / URL QUERY PARAMETR YOXLANIŞI ---
+# İstifadəçi ödəniş edib qayıdanda URL-də ?success=true və ya ?email=... gələ bilər
+query_params = st.query_params
+if "success" in query_params and query_params["success"] == "true":
+  st.session_state.is_pro = True
+  st.session_state.credits = 999  # Pro istifadəçiyə yüksək haqq
+  st.success(
+      "🎉 Ödənişiniz uğurla təsdiqləndi! Hesabınız Pro statusuna yüksəldildi."
+  )
 
 # ---------------------------------------------------------
 # PROFESSIONAL SAAS & PRICING DİZAYNI (TÜRKÇE)
@@ -80,7 +97,7 @@ st.markdown(
 )
 
 # ---------------------------------------------------------
-# ANA EKRAN & PULSUZ HAQQ BİLDİRİŞİ
+# ANA EKRAN & KULLANICI BİLGİSİ
 # ---------------------------------------------------------
 st.markdown(
     '<div><span class="badge">✨ AI-POWERED VIRAL SHORTS ENGINE</span></div>',
@@ -99,24 +116,57 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
-if st.session_state.free_credits > 0:
-  st.info(
-      f"🎁 **Sınaq Rejimi:** Sizin bu gün **{st.session_state.free_credits}**"
-      " pulsuz video haqqınız var!"
+# İstifadəçi statusu paneli
+col_stat1, col_stat2 = st.columns([2, 1])
+with col_stat1:
+  user_email_input = st.text_input(
+      "E-Posta Adresiniz (Ödeme takibi için):",
+      value=st.session_state.user_email,
+      placeholder="ornek@gmail.com",
   )
-else:
-  st.warning(
-      "⚠️ Pulsuz video haqqınız bitdi! Sınırsız video istehsal etmək üçün"
-      " aşağıdan paket seçə bilərsiniz."
-  )
+  if user_email_input != st.session_state.user_email:
+    st.session_state.user_email = user_email_input
+
+with col_stat2:
+  st.markdown("<br>", unsafe_allow_html=True)
+  if st.session_state.is_pro:
+    st.markdown(
+        "<div style='background:#065f46; color:#34d399; padding:10px;"
+        " border-radius:10px; text-align:center; font-weight:bold;'>👑 PRO"
+        " AKTİF</div>",
+        unsafe_allow_html=True,
+    )
+  else:
+    st.markdown(
+        f"<div style='background:#1f2937; color:#fbbf24; padding:10px;"
+        f" border-radius:10px; text-align:center; font-weight:bold;'>🎁 Kalan"
+        f" Hak: {st.session_state.credits}</div>",
+        unsafe_allow_html=True,
+    )
 
 st.markdown("<br>", unsafe_allow_html=True)
 
 # ---------------------------------------------------------
-# ABONELİK PLANLARI (LEMON SQUEEZY LİNKLƏRİ İLƏ)
+# ABONELİK PLANLARI (LEMON SQUEEZY LİNKLƏRİ)
 # ---------------------------------------------------------
 st.markdown("<h3>💳 Abonelik Planları (Starter / Pro)</h3>", unsafe_allow_html=True)
 col_p1, col_p2 = st.columns(2)
+
+# Qeyd: Lemon Squeezy linklərinə yönləndirərkən istifadəçi e-postasını avtometrik ötürmək üçün ?checkout[email]=... əlavə edə bilərik
+email_param = (
+    f"?checkout[email]={st.session_state.user_email}"
+    if st.session_state.user_email
+    else ""
+)
+
+starter_link = (
+    "https://shortsai.lemonsqueezy.com/checkout/buy/b9834fd0-be33-4377-85b7-47da685d2df1"
+    + email_param
+)
+pro_link = (
+    "https://shortsai.lemonsqueezy.com/checkout/buy/39b5d7c7-4b5e-47b1-a29a-248e682ea857"
+    + email_param
+)
 
 with col_p1:
   st.markdown(
@@ -131,7 +181,7 @@ with col_p1:
   )
   st.link_button(
       "👉 Starter Plan Satın Al",
-      "https://shortsai.lemonsqueezy.com/checkout/buy/b9834fd0-be33-4377-85b7-47da685d2df1",
+      starter_link,
       type="secondary",
       use_container_width=True,
   )
@@ -149,7 +199,7 @@ with col_p2:
   )
   st.link_button(
       "👉 Pro Plan Satın Al",
-      "https://shortsai.lemonsqueezy.com/checkout/buy/39b5d7c7-4b5e-47b1-a29a-248e682ea857",
+      pro_link,
       type="primary",
       use_container_width=True,
   )
@@ -202,7 +252,7 @@ async def generate_audio(text, voice_name, output_path):
 
 
 if st.button("✨ VİDEOYU SİHİRLİ ŞEKİLDE OLUŞTUR"):
-  if st.session_state.free_credits <= 0:
+  if st.session_state.credits <= 0 and not st.session_state.is_pro:
     st.error(
         "⚠️ Ücretsiz kullanım hakkınız kalmamıştır! Lütfen yukarıdaki paketlerden"
         " birini satın alın."
@@ -307,7 +357,9 @@ if st.button("✨ VİDEOYU SİHİRLİ ŞEKİLDE OLUŞTUR"):
               logger=None,
           )
 
-          st.session_state.free_credits -= 1
+          # Əgər Pro deyilsə, haqqını 1 azaldırıq
+          if not st.session_state.is_pro:
+            st.session_state.credits -= 1
 
           st.markdown('<div class="main-box">', unsafe_allow_html=True)
           st.success("🎉 Videonuz başarıyla oluşturuldu!")
@@ -324,3 +376,4 @@ if st.button("✨ VİDEOYU SİHİRLİ ŞEKİLDE OLUŞTUR"):
 
         except Exception as e:
           st.error(f"Hata oluştu: {e}")
+    
