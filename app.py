@@ -2,6 +2,9 @@ import asyncio
 import json
 import os
 import random
+import smtplib
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
 import edge_tts
 from moviepy import AudioFileClip, CompositeVideoClip, TextClip, VideoFileClip
 import streamlit as st
@@ -26,13 +29,36 @@ def save_db(db):
     with open(DB_FILE, "w") as f:
         json.dump(db, f)
 
+# --- GMAIL SMTP İLE OTP KOD GÖNDERME FONKSİYONU ---
+def send_otp_email(receiver_email, otp_code):
+    sender_email = "shortaipro@gmail.com"
+    app_password = "uswyrmrzmodynsve"  # Şifrən avtomatik olaraq əlavə olundu (boşluqsuz)
+    
+    try:
+        msg = MIMEMultipart()
+        msg['From'] = sender_email
+        msg['To'] = receiver_email
+        msg['Subject'] = "Nexen - E-Posta Doğrulama Kodu"
+        
+        body = f"Nexen platformasına xoş gəldiniz!\n\nDoğrulama kodunuz: {otp_code}\n\nBu kodu heç kimlə paylaşmayın."
+        msg.attach(MIMEText(body, 'plain'))
+        
+        server = smtplib.SMTP('smtp.gmail.com', 587)
+        server.starttls()
+        server.login(sender_email, app_password)
+        server.sendmail(sender_email, receiver_email, msg.as_string())
+        server.quit()
+        return True
+    except Exception as e:
+        return False
+
 # --- URL SORGULARI VE ÖDEME KONTROLÜ ---
 query_params = st.query_params
 if "success" in query_params and query_params["success"] == "true":
     st.success("Ödemeniz başarıyla onaylandı. Pro paketinizin aktif olması için lütfen aşağıya e-posta adresinizi yazın.")
 
 # ---------------------------------------------------------
-# NEXEN - ULTRA PREMİUM & KREDİBİL STİL (TÜRKÇE)
+# NEXEN - ULTRA PREMİUM & GÜVENLİ STİL (TÜRKÇE)
 # ---------------------------------------------------------
 st.markdown("""
     <style>
@@ -65,10 +91,6 @@ st.markdown("""
         text-align: center;
         box-shadow: 0 10px 30px rgba(0,0,0,0.4);
         margin-bottom: 15px;
-        transition: transform 0.3s ease;
-    }
-    .pricing-card:hover {
-        border-color: rgba(139, 92, 246, 0.6);
     }
     .trust-banner {
         background: rgba(16, 185, 129, 0.08);
@@ -98,7 +120,6 @@ st.markdown("""
         box-shadow: 0 15px 35px rgba(124, 58, 237, 0.6);
     }
     
-    /* NEXEN CANLI FİRLANAN ÖZƏL LOQOSU */
     @keyframes pulse-spin {
         0% { transform: rotate(0deg) scale(1); box-shadow: 0 0 15px rgba(124, 58, 237, 0.4); }
         50% { transform: rotate(180deg) scale(1.05); box-shadow: 0 0 25px rgba(56, 189, 248, 0.7); }
@@ -156,37 +177,78 @@ st.markdown("""
 st.markdown("<h1 style='font-size:28px; font-weight:700; margin-bottom:8px;'>Saniyeler İçinde Viral Short'lar Üretin</h1>", unsafe_allow_html=True)
 st.markdown("<p style='color:#9ca3af; font-size:15px;'>Metninizi girin; akıllı altyazı ve stüdyo kalitesinde seslendirme ile videonuz anında hazır olsun.</p>", unsafe_allow_html=True)
 
-# Güvən Banneri
-st.markdown('<div class="trust-banner">🔒 256-Bit Güvenli Ödeme Altyapısı • 7/24 Destek: shortaipro@gmail.com • Anında Teslimat</div>', unsafe_allow_html=True)
+st.markdown('<div class="trust-banner">🔒 Güvenli E-Posta Doğrulama Sistemi • 7/24 Destek: shortaipro@gmail.com</div>', unsafe_allow_html=True)
+
+# --- SESSION STATE (Giriş və OTP Doğrulama İdarəetməsi) ---
+if "otp_sent" not in st.session_state:
+    st.session_state.otp_sent = False
+if "generated_otp" not in st.session_state:
+    st.session_state.generated_otp = ""
+if "is_verified" not in st.session_state:
+    st.session_state.is_verified = False
+
+db = load_db()
 
 col_stat1, col_stat2 = st.columns([2, 1])
 with col_stat1:
-    user_email = st.text_input("E-Posta Adresiniz (Hakkınızı korumak ve ödemeyi eşleştirmek için zorunludur):", placeholder="ornek@gmail.com")
+    user_email = st.text_input("E-Posta Adresiniz:", placeholder="ornek@gmail.com")
 
-db = load_db()
-current_credits = 1
+if "last_email" not in st.session_state:
+    st.session_state.last_email = ""
+
+if user_email != st.session_state.last_email:
+    st.session_state.last_email = user_email
+    st.session_state.is_verified = False
+    st.session_state.otp_sent = False
+
+current_credits = 0
 is_pro_user = False
 
-if user_email and "@" in user_email:
-    user_email = user_email.strip().lower()
-    if user_email not in db:
-        db[user_email] = {"credits": 1, "is_pro": False}
-        save_db(db)
+if user_email and "@" in user_email and "." in user_email:
+    clean_email = user_email.strip().lower()
     
-    current_credits = db[user_email]["credits"]
-    is_pro_user = db[user_email]["is_pro"]
-    
-    if "success" in query_params and query_params["success"] == "true":
-        db[user_email]["is_pro"] = True
-        db[user_email]["credits"] = 999
+    if clean_email in db:
+        st.session_state.is_verified = True
+        current_credits = db[clean_email]["credits"]
+        is_pro_user = db[clean_email]["is_pro"]
+    else:
+        if not st.session_state.otp_sent:
+            if st.button("Doğrulama Kodu Göndər"):
+                code = str(random.randint(1000, 9999))
+                st.session_state.generated_otp = code
+                with st.spinner("Kod e-posta adresinə göndərilir..."):
+                    success = send_otp_email(clean_email, code)
+                    if success:
+                        st.session_state.otp_sent = True
+                        st.success("Doğrulama kodu e-posta adresinizə göndərildi! Gelen kutunuzu (və ya spam) yoxlayın.")
+                        st.rerun()
+                    else:
+                        st.error("Kod göndərilə bilmədi. Zəhmət olmasa e-posta ünvanınızı yoxlayın.")
+        
+        if st.session_state.otp_sent and not st.session_state.is_verified:
+            entered_otp = st.text_input("E-Postanıza gələn 4 rəqəmli kodu daxil edin:", max_chars=4)
+            if st.button("Kodu Təsdiqlə"):
+                if entered_otp.strip() == st.session_state.generated_otp:
+                    st.session_state.is_verified = True
+                    db[clean_email] = {"credits": 1, "is_pro": False}
+                    save_db(db)
+                    current_credits = 1
+                    st.success("E-posta uğurla doğrulandı! 1 pulsuz video haqqınız tanımlandı.")
+                    st.rerun()
+                else:
+                    st.error("Yanlış kod! Zəhmət olmasa yenidən yoxlayın.")
+
+    if "success" in query_params and query_params["success"] == "true" and st.session_state.is_verified:
+        db[clean_email]["is_pro"] = True
+        db[clean_email]["credits"] = 999
         save_db(db)
         is_pro_user = True
         current_credits = 999
 
 with col_stat2:
     st.markdown("<br>", unsafe_allow_html=True)
-    if not user_email:
-        st.markdown("<div style='background:#1f293d; color:#9ca3af; padding:10px; border-radius:10px; text-align:center; font-size:13px;'>E-posta Girin</div>", unsafe_allow_html=True)
+    if not user_email or not st.session_state.is_verified:
+        st.markdown("<div style='background:#1f293d; color:#9ca3af; padding:10px; border-radius:10px; text-align:center; font-size:13px;'>Doğrulama Gözlənilir</div>", unsafe_allow_html=True)
     elif is_pro_user:
         st.markdown("<div style='background:rgba(16, 185, 129, 0.15); color:#34d399; border:1px solid rgba(16,185,129,0.3); padding:10px; border-radius:10px; text-align:center; font-weight:600;'>PRO AKTİF</div>", unsafe_allow_html=True)
     else:
@@ -195,7 +257,7 @@ with col_stat2:
 st.markdown("<br>", unsafe_allow_html=True)
 
 # ---------------------------------------------------------
-# ABONELİK PLANLARI (LEMON SQUEEZY LİNKLƏRİ)
+# ABONELİK PLANLARI (LEMON SQUEEZY LİNkləri)
 # ---------------------------------------------------------
 st.markdown("<h3>Abonelik ve Paket Planları</h3>", unsafe_allow_html=True)
 col_p1, col_p2 = st.columns(2)
@@ -271,10 +333,10 @@ async def generate_audio(text, voice_name, output_path):
     await communicate.save(output_path)
 
 if st.button("VİDEOYU OLUŞTUR"):
-    if not user_email or "@" not in user_email:
-        st.warning("Video üretmeden önce lütfen üst kısıma geçerli bir e-posta adresi girin.")
+    if not st.session_state.is_verified:
+        st.warning("Video üretmeden önce lütfen e-posta adresinizi yazın ve doğrulama kodunu girerek hesabınızı aktive edin.")
     elif current_credits <= 0 and not is_pro_user:
-        st.error("Ücretsiz kullanım hakkınız kalmamıştır. Sınırsız video üretmek için lütfen yukarıdaki paketlerden birini satın alın.")
+        st.error("Ücretsiz kullanım hakkınız kalmasmıştır. Sınırsız video üretmek için lütfen yukarıdaki paketlerden birini satın alın.")
     elif not text_input.strip():
         st.warning("Lütfen boş bırakmayın, bir metin girin.")
     else:
@@ -355,7 +417,8 @@ if st.button("VİDEOYU OLUŞTUR"):
                     )
                     
                     if not is_pro_user:
-                        db[user_email]["credits"] -= 1
+                        clean_email = user_email.strip().lower()
+                        db[clean_email]["credits"] -= 1
                         save_db(db)
                     
                     st.markdown('<div class="main-box">', unsafe_allow_html=True)
@@ -385,3 +448,4 @@ st.markdown("""
         <p style='font-size: 11px; color: #4b5563; margin-top: 5px;'>Güvenli ödemeler Lemon Squeezy altyapısı ile işlenmektedir.</p>
     </div>
 """, unsafe_allow_html=True)
+                
