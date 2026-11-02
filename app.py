@@ -32,7 +32,7 @@ def save_db(db):
 # --- GMAIL SMTP İLE OTP KOD GÖNDERME FONKSİYONU ---
 def send_otp_email(receiver_email, otp_code):
     sender_email = "shortaipro@gmail.com"
-    app_password = "uswyrmrzmodynsve"  # Şifrən avtomatik olaraq əlavə olundu (boşluqsuz)
+    app_password = "uswyrmrzmodynsve"  # Şifrən daxil edildi
     
     try:
         msg = MIMEMultipart()
@@ -40,7 +40,7 @@ def send_otp_email(receiver_email, otp_code):
         msg['To'] = receiver_email
         msg['Subject'] = "Nexen - E-Posta Doğrulama Kodu"
         
-        body = f"Nexen platformasına xoş gəldiniz!\n\nDoğrulama kodunuz: {otp_code}\n\nBu kodu heç kimlə paylaşmayın."
+        body = f"Nexen platformasına hoş geldiniz!\n\nDoğrulama kodunuz: {otp_code}\n\nBu kodu kimseyle paylaşmayın."
         msg.attach(MIMEText(body, 'plain'))
         
         server = smtplib.SMTP('smtp.gmail.com', 587)
@@ -48,9 +48,9 @@ def send_otp_email(receiver_email, otp_code):
         server.login(sender_email, app_password)
         server.sendmail(sender_email, receiver_email, msg.as_string())
         server.quit()
-        return True
+        return True, "Başarılı"
     except Exception as e:
-        return False
+        return False, str(e)
 
 # --- URL SORGULARI VE ÖDEME KONTROLÜ ---
 query_params = st.query_params
@@ -162,7 +162,7 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # ---------------------------------------------------------
-# ÜST BÖLMƏ: NEXEN BRANDING & LOGO
+# ÜST BÖLÜM: NEXEN BRANDING & LOGO
 # ---------------------------------------------------------
 st.markdown("""
     <div class="brand-container">
@@ -179,7 +179,7 @@ st.markdown("<p style='color:#9ca3af; font-size:15px;'>Metninizi girin; akıllı
 
 st.markdown('<div class="trust-banner">🔒 Güvenli E-Posta Doğrulama Sistemi • 7/24 Destek: shortaipro@gmail.com</div>', unsafe_allow_html=True)
 
-# --- SESSION STATE (Giriş və OTP Doğrulama İdarəetməsi) ---
+# --- SESSION STATE ---
 if "otp_sent" not in st.session_state:
     st.session_state.otp_sent = False
 if "generated_otp" not in st.session_state:
@@ -213,30 +213,30 @@ if user_email and "@" in user_email and "." in user_email:
         is_pro_user = db[clean_email]["is_pro"]
     else:
         if not st.session_state.otp_sent:
-            if st.button("Doğrulama Kodu Göndər"):
+            if st.button("Doğrulama Kodu Gönder"):
                 code = str(random.randint(1000, 9999))
                 st.session_state.generated_otp = code
-                with st.spinner("Kod e-posta adresinə göndərilir..."):
-                    success = send_otp_email(clean_email, code)
+                with st.spinner("Kod e-posta adresine gönderiliyor..."):
+                    success, err_msg = send_otp_email(clean_email, code)
                     if success:
                         st.session_state.otp_sent = True
-                        st.success("Doğrulama kodu e-posta adresinizə göndərildi! Gelen kutunuzu (və ya spam) yoxlayın.")
+                        st.success("Doğrulama kodu e-posta adresinize gönderildi! Gelen kutunuzu (veya spam) kontrol edin.")
                         st.rerun()
                     else:
-                        st.error("Kod göndərilə bilmədi. Zəhmət olmasa e-posta ünvanınızı yoxlayın.")
+                        st.error(f"Kod gönderilemedi! Hata detayı: {err_msg}")
         
         if st.session_state.otp_sent and not st.session_state.is_verified:
-            entered_otp = st.text_input("E-Postanıza gələn 4 rəqəmli kodu daxil edin:", max_chars=4)
-            if st.button("Kodu Təsdiqlə"):
+            entered_otp = st.text_input("E-Postanıza gelen 4 haneli kodu girin:", max_chars=4)
+            if st.button("Kodu Doğrula"):
                 if entered_otp.strip() == st.session_state.generated_otp:
                     st.session_state.is_verified = True
                     db[clean_email] = {"credits": 1, "is_pro": False}
                     save_db(db)
                     current_credits = 1
-                    st.success("E-posta uğurla doğrulandı! 1 pulsuz video haqqınız tanımlandı.")
+                    st.success("E-posta başarıyla doğrulandı! 1 ücretsiz video hakkınız tanımlandı.")
                     st.rerun()
                 else:
-                    st.error("Yanlış kod! Zəhmət olmasa yenidən yoxlayın.")
+                    st.error("Yanlış kod! Lütfen tekrar deneyin.")
 
     if "success" in query_params and query_params["success"] == "true" and st.session_state.is_verified:
         db[clean_email]["is_pro"] = True
@@ -248,7 +248,7 @@ if user_email and "@" in user_email and "." in user_email:
 with col_stat2:
     st.markdown("<br>", unsafe_allow_html=True)
     if not user_email or not st.session_state.is_verified:
-        st.markdown("<div style='background:#1f293d; color:#9ca3af; padding:10px; border-radius:10px; text-align:center; font-size:13px;'>Doğrulama Gözlənilir</div>", unsafe_allow_html=True)
+        st.markdown("<div style='background:#1f293d; color:#9ca3af; padding:10px; border-radius:10px; text-align:center; font-size:13px;'>Doğrulama Bekleniyor</div>", unsafe_allow_html=True)
     elif is_pro_user:
         st.markdown("<div style='background:rgba(16, 185, 129, 0.15); color:#34d399; border:1px solid rgba(16,185,129,0.3); padding:10px; border-radius:10px; text-align:center; font-weight:600;'>PRO AKTİF</div>", unsafe_allow_html=True)
     else:
@@ -257,7 +257,7 @@ with col_stat2:
 st.markdown("<br>", unsafe_allow_html=True)
 
 # ---------------------------------------------------------
-# ABONELİK PLANLARI (LEMON SQUEEZY LİNkləri)
+# ABONELİK PLANLARI (LEMON SQUEEZY LİNKLERİ)
 # ---------------------------------------------------------
 st.markdown("<h3>Abonelik ve Paket Planları</h3>", unsafe_allow_html=True)
 col_p1, col_p2 = st.columns(2)
@@ -336,7 +336,7 @@ if st.button("VİDEOYU OLUŞTUR"):
     if not st.session_state.is_verified:
         st.warning("Video üretmeden önce lütfen e-posta adresinizi yazın ve doğrulama kodunu girerek hesabınızı aktive edin.")
     elif current_credits <= 0 and not is_pro_user:
-        st.error("Ücretsiz kullanım hakkınız kalmasmıştır. Sınırsız video üretmek için lütfen yukarıdaki paketlerden birini satın alın.")
+        st.error("Ücretsiz kullanım hakkınız kalmamıştır. Sınırsız video üretmek için lütfen yukarıdaki paketlerden birini satın alın.")
     elif not text_input.strip():
         st.warning("Lütfen boş bırakmayın, bir metin girin.")
     else:
@@ -448,4 +448,4 @@ st.markdown("""
         <p style='font-size: 11px; color: #4b5563; margin-top: 5px;'>Güvenli ödemeler Lemon Squeezy altyapısı ile işlenmektedir.</p>
     </div>
 """, unsafe_allow_html=True)
-                
+        
