@@ -32,7 +32,7 @@ if "success" in query_params and query_params["success"] == "true":
     st.success("🎉 Ödemeniz başarıyla onaylandı! Pro paketinizin aktif olması için lütfen aşağıya e-posta adresinizi yazın.")
 
 # ---------------------------------------------------------
-# PROFESSIONAL SAAS & PRICING TASARIMI (TÜRKÇE)
+# PROFESSIONAL SAAS & GÜVEN VERİCİ TASARIM (TÜRKÇE)
 # ---------------------------------------------------------
 st.markdown("""
     <style>
@@ -63,6 +63,17 @@ st.markdown("""
         text-align: center;
         box-shadow: 0 10px 25px rgba(0,0,0,0.3);
         margin-bottom: 15px;
+    }
+    .trust-badge {
+        background: rgba(16, 185, 129, 0.1);
+        border: 1px solid rgba(16, 185, 129, 0.3);
+        color: #34d399;
+        padding: 10px;
+        border-radius: 10px;
+        text-align: center;
+        font-size: 13px;
+        font-weight: 600;
+        margin-bottom: 20px;
     }
     .stButton>button {
         background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
@@ -101,6 +112,9 @@ st.markdown('<div><span class="badge">✨ YAPAY ZEKA DESTEKLİ VİRAL SHORTS ÜR
 st.markdown("<h1 style='font-size:32px; font-weight:800; margin-bottom:5px;'>Saniyeler İçinde Viral Short'lar Üretin</h1>", unsafe_allow_html=True)
 st.markdown("<p style='color:#9ca3af; font-size:15px;'>İstediğiniz konuyu yazın; kusursuz altyazı ve yüksek kaliteli yapay zeka seslendirmesi ile videonuz anında hazır olsun.</p>", unsafe_allow_html=True)
 
+# Güvən nişanı (Trust Badge)
+st.markdown('<div class="trust-badge">🔒 Güvenli Ödeme Altyapısı • 7/24 Destek: shortaipro@gmail.com • Anında Teslimat</div>', unsafe_allow_html=True)
+
 col_stat1, col_stat2 = st.columns([2, 1])
 with col_stat1:
     user_email = st.text_input("E-Posta Adresiniz (Hakkınızı korumak ve ödemeyi eşleştirmek için zorunludur):", placeholder="ornek@gmail.com")
@@ -137,7 +151,7 @@ with col_stat2:
 st.markdown("<br>", unsafe_allow_html=True)
 
 # ---------------------------------------------------------
-# ABONELİK PLANLARI (LEMON SQUEEZY LİNKLERİ)
+# ABONELİK PLANLARI (LEMON SQUEEZY LİNKLƏRİ)
 # ---------------------------------------------------------
 st.markdown("<h3>💳 Abonelik ve Paket Planları (Starter / Pro)</h3>", unsafe_allow_html=True)
 col_p1, col_p2 = st.columns(2)
@@ -315,3 +329,16 @@ if st.button("✨ VİDEOYU SİHİRLİ ŞEKİLDE OLUŞTUR"):
                     
                 except Exception as e:
                     st.error(f"İşlem sırasında bir hata oluştu: {e}")
+
+# ---------------------------------------------------------
+# ALT BİLGİ (FOOTER) - ETİBAR VE İLETİŞİM
+# ---------------------------------------------------------
+st.markdown("<br><hr>", unsafe_allow_html=True)
+st.markdown("""
+    <div style='text-align: center; color: #9ca3af; font-size: 13px;'>
+        <p>Shorts AI Studio — Tüm hakları saklıdır. © 2026</p>
+        <p>Destek ve İletişim: <a href='mailto:shortaipro@gmail.com' style='color: #c084fc;'>shortaipro@gmail.com</a></p>
+        <p style='font-size: 11px; color: #6b7280;'>Güvenli ödemeler Lemon Squeezy altyapısı ile işlenmektedir.</p>
+    </div>
+""", unsafe_allow_html=True)
+                          
