@@ -7,7 +7,7 @@ from moviepy import AudioFileClip, CompositeVideoClip, TextClip, VideoFileClip
 import streamlit as st
 
 st.set_page_config(
-    page_title="Shorts AI Studio | Pro Creator", page_icon="⚡", layout="centered"
+    page_title="Nexen | Short Video Engine", page_icon="⚡", layout="centered"
 )
 
 # --- VERİTABANI YÖNETİMİ (JSON) ---
@@ -32,118 +32,132 @@ if "success" in query_params and query_params["success"] == "true":
     st.success("Ödemeniz başarıyla onaylandı. Pro paketinizin aktif olması için lütfen aşağıya e-posta adresinizi yazın.")
 
 # ---------------------------------------------------------
-# PROFESSIONAL SAAS & BRANDED UI (ÖZEL LOGO VE STİL)
+# NEXEN - ULTRA PREMİUM & KREDİBİL STİL (TÜRKÇE)
 # ---------------------------------------------------------
 st.markdown("""
     <style>
     .stApp {
-        background-color: #0b0f19;
+        background-color: #07090e;
         color: #f3f4f6;
         font-family: 'Inter', sans-serif;
     }
     .stTextArea textarea {
-        background-color: #1f2937 !important;
+        background-color: #121824 !important;
         color: #ffffff !important;
-        border: 1px solid #374151 !important;
-        border-radius: 12px !important;
+        border: 1px solid #1f293d !important;
+        border-radius: 14px !important;
+        padding: 15px !important;
     }
     .main-box {
-        background: rgba(17, 24, 39, 0.85);
-        border: 1px solid rgba(255, 255, 255, 0.1);
+        background: rgba(18, 24, 36, 0.75);
+        border: 1px solid rgba(255, 255, 255, 0.06);
         border-radius: 20px;
         padding: 25px;
-        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+        box-shadow: 0 25px 50px rgba(0, 0, 0, 0.6);
         margin-bottom: 25px;
+        backdrop-filter: blur(10px);
     }
     .pricing-card {
-        background: linear-gradient(145deg, #181d28, #111827);
-        border: 1px solid rgba(168, 85, 247, 0.3);
+        background: linear-gradient(145deg, #131b2e, #0d1320);
+        border: 1px solid rgba(139, 92, 246, 0.25);
         border-radius: 16px;
-        padding: 20px;
+        padding: 22px;
         text-align: center;
-        box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+        box-shadow: 0 10px 30px rgba(0,0,0,0.4);
         margin-bottom: 15px;
+        transition: transform 0.3s ease;
     }
-    .trust-badge {
-        background: rgba(16, 185, 129, 0.1);
-        border: 1px solid rgba(16, 185, 129, 0.3);
+    .pricing-card:hover {
+        border-color: rgba(139, 92, 246, 0.6);
+    }
+    .trust-banner {
+        background: rgba(16, 185, 129, 0.08);
+        border: 1px solid rgba(16, 185, 129, 0.2);
         color: #34d399;
-        padding: 10px;
-        border-radius: 10px;
+        padding: 12px;
+        border-radius: 12px;
         text-align: center;
         font-size: 13px;
-        font-weight: 600;
-        margin-bottom: 20px;
+        font-weight: 500;
+        margin-bottom: 25px;
     }
     .stButton>button {
-        background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
+        background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
         color: #ffffff !important;
-        font-weight: 700 !important;
-        font-size: 16px !important;
-        border-radius: 14px !important;
+        font-weight: 600 !important;
+        font-size: 15px !important;
+        border-radius: 12px !important;
         border: none !important;
         padding: 14px 28px !important;
-        box-shadow: 0 10px 25px rgba(99, 102, 241, 0.4);
+        box-shadow: 0 10px 25px rgba(79, 70, 229, 0.4);
         width: 100%;
         transition: all 0.3s ease;
     }
     .stButton>button:hover {
         transform: translateY(-2px);
-        box-shadow: 0 15px 30px rgba(168, 85, 247, 0.6);
+        box-shadow: 0 15px 35px rgba(124, 58, 237, 0.6);
     }
     
-    /* HƏRƏKƏTLİ (FIRLANAN) ÖZƏL SÜNİ İNTELLEKT LOGOSU */
-    @keyframes spin-slow {
-        0% { transform: rotate(0deg); }
-        100% { transform: rotate(360deg); }
+    /* NEXEN CANLI FİRLANAN ÖZƏL LOQOSU */
+    @keyframes pulse-spin {
+        0% { transform: rotate(0deg) scale(1); box-shadow: 0 0 15px rgba(124, 58, 237, 0.4); }
+        50% { transform: rotate(180deg) scale(1.05); box-shadow: 0 0 25px rgba(56, 189, 248, 0.7); }
+        100% { transform: rotate(360deg) scale(1); box-shadow: 0 0 15px rgba(124, 58, 237, 0.4); }
     }
-    .ai-logo-container {
+    .brand-container {
         display: flex;
         align-items: center;
-        gap: 15px;
-        margin-bottom: 20px;
+        gap: 16px;
+        margin-bottom: 25px;
     }
-    .rotating-logo {
-        width: 45px;
-        height: 45px;
-        background: linear-gradient(135deg, #6366f1, #a855f7, #38bdf8);
-        border-radius: 12px;
+    .brand-logo {
+        width: 48px;
+        height: 48px;
+        background: linear-gradient(135deg, #4f46e5, #7c3aed, #38bdf8);
+        border-radius: 14px;
         display: flex;
         align-items: center;
         justify-content: center;
-        font-size: 22px;
-        box-shadow: 0 0 20px rgba(168, 85, 247, 0.5);
-        animation: spin-slow 8s linear infinite;
+        font-size: 24px;
+        color: white;
+        animation: pulse-spin 6s linear infinite;
     }
     .brand-title {
-        font-size: 24px;
+        font-size: 26px;
         font-weight: 800;
-        background: linear-gradient(90deg, #ffffff, #c084fc);
+        background: linear-gradient(90deg, #ffffff, #a78bfa);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
         letter-spacing: -0.5px;
+    }
+    .brand-subtitle {
+        font-size: 12px;
+        color: #9ca3af;
+        font-weight: 500;
+        letter-spacing: 0.5px;
+        text-transform: uppercase;
     }
     </style>
 """, unsafe_allow_html=True)
 
 # ---------------------------------------------------------
-# ÜST BÖLMƏ: FIRLANAN ÖZƏL LOGO VƏ BREND
+# ÜST BÖLMƏ: NEXEN BRANDING & LOGO
 # ---------------------------------------------------------
 st.markdown("""
-    <div class="ai-logo-container">
-        <div class="rotating-logo">⚡</div>
+    <div class="brand-container">
+        <div class="brand-logo">🪩</div>
         <div>
-            <div class="brand-title">Shorts AI Studio</div>
-            <div style="font-size: 12px; color: #9ca3af; font-weight: 500;">Next-Gen Autonomous Video Engine</div>
+            <div class="brand-title">Nexen</div>
+            <div class="brand-subtitle">Autonomous Short Video Engine</div>
         </div>
     </div>
 """, unsafe_allow_html=True)
 
-st.markdown("<h1 style='font-size:30px; font-weight:800; margin-bottom:5px;'>Saniyeler İçinde Viral Short'lar Üretin</h1>", unsafe_allow_html=True)
-st.markdown("<p style='color:#9ca3af; font-size:15px;'>Metninizi girin; yapay zeka destekli akıllı altyazı ve stüdyo kalitesinde seslendirme ile videonuz anında hazır olsun.</p>", unsafe_allow_html=True)
+st.markdown("<h1 style='font-size:28px; font-weight:700; margin-bottom:8px;'>Saniyeler İçinde Viral Short'lar Üretin</h1>", unsafe_allow_html=True)
+st.markdown("<p style='color:#9ca3af; font-size:15px;'>Metninizi girin; akıllı altyazı ve stüdyo kalitesinde seslendirme ile videonuz anında hazır olsun.</p>", unsafe_allow_html=True)
 
-# Güvən nişanı
-st.markdown('<div class="trust-badge">Güvenli Ödeme Altyapısı • 7/24 Destek: shortaipro@gmail.com • Anında Teslimat</div>', unsafe_allow_html=True)
+# Güvən Banneri
+st.markdown('<div class="trust-banner">🔒 256-Bit Güvenli Ödeme Altyapısı • 7/24 Destek: shortaipro@gmail.com • Anında Teslimat</div>', unsafe_allow_html=True)
 
 col_stat1, col_stat2 = st.columns([2, 1])
 with col_stat1:
@@ -172,11 +186,11 @@ if user_email and "@" in user_email:
 with col_stat2:
     st.markdown("<br>", unsafe_allow_html=True)
     if not user_email:
-        st.markdown("<div style='background:#374151; color:#f3f4f6; padding:10px; border-radius:10px; text-align:center; font-size:13px;'>E-posta Girin</div>", unsafe_allow_html=True)
+        st.markdown("<div style='background:#1f293d; color:#9ca3af; padding:10px; border-radius:10px; text-align:center; font-size:13px;'>E-posta Girin</div>", unsafe_allow_html=True)
     elif is_pro_user:
-        st.markdown("<div style='background:#065f46; color:#34d399; padding:10px; border-radius:10px; text-align:center; font-weight:bold;'>PRO AKTİF</div>", unsafe_allow_html=True)
+        st.markdown("<div style='background:rgba(16, 185, 129, 0.15); color:#34d399; border:1px solid rgba(16,185,129,0.3); padding:10px; border-radius:10px; text-align:center; font-weight:600;'>PRO AKTİF</div>", unsafe_allow_html=True)
     else:
-        st.markdown(f"<div style='background:#1f2937; color:#fbbf24; padding:10px; border-radius:10px; text-align:center; font-weight:bold;'>Kalan Hak: {current_credits}</div>", unsafe_allow_html=True)
+        st.markdown(f"<div style='background:#121824; color:#fbbf24; border:1px solid rgba(251,191,36,0.2); padding:10px; border-radius:10px; text-align:center; font-weight:600;'>Kalan Hak: {current_credits}</div>", unsafe_allow_html=True)
 
 st.markdown("<br>", unsafe_allow_html=True)
 
@@ -193,9 +207,9 @@ pro_link = "https://shortsai.lemonsqueezy.com/checkout/buy/39b5d7c7-4b5e-47b1-a2
 with col_p1:
     st.markdown("""
         <div class="pricing-card">
-            <h3 style="color: #c084fc; margin-bottom: 5px;">Starter Plan</h3>
-            <h2 style="color: #ffffff; margin-bottom: 15px;">$9.99 <span style="font-size: 14px; color: #9ca3af;">/ tek seferlik</span></h2>
-            <p style="color: #9ca3af; font-size: 13px;">Temel yapay zeka video üretim özelliklerine erişim.</p>
+            <h3 style="color: #a78bfa; margin-bottom: 5px; font-size: 18px;">Starter Plan</h3>
+            <h2 style="color: #ffffff; margin-bottom: 12px; font-size: 24px;">$9.99 <span style="font-size: 13px; color: #9ca3af; font-weight: 400;">/ tek seferlik</span></h2>
+            <p style="color: #9ca3af; font-size: 13px;">Temel video üretim özelliklerine erişim.</p>
         </div>
     """, unsafe_allow_html=True)
     st.link_button("Starter Plan Satın Al", starter_link, type="secondary", use_container_width=True)
@@ -203,9 +217,9 @@ with col_p1:
 with col_p2:
     st.markdown("""
         <div class="pricing-card">
-            <h3 style="color: #38bdf8; margin-bottom: 5px;">Pro Plan</h3>
-            <h2 style="color: #ffffff; margin-bottom: 15px;">$29.99 <span style="font-size: 14px; color: #9ca3af;">/ tek seferlik</span></h2>
-            <p style="color: #9ca3af; font-size: 13px;">Tüm AI video araçlarına ve sınırsız özelliklere tam erişim.</p>
+            <h3 style="color: #38bdf8; margin-bottom: 5px; font-size: 18px;">Pro Plan</h3>
+            <h2 style="color: #ffffff; margin-bottom: 12px; font-size: 24px;">$29.99 <span style="font-size: 13px; color: #9ca3af; font-weight: 400;">/ tek seferlik</span></h2>
+            <p style="color: #9ca3af; font-size: 13px;">Tüm video araçlarına ve sınırsız özelliklere tam erişim.</p>
         </div>
     """, unsafe_allow_html=True)
     st.link_button("Pro Plan Satın Al", pro_link, type="primary", use_container_width=True)
@@ -264,7 +278,7 @@ if st.button("VİDEOYU OLUŞTUR"):
     elif not text_input.strip():
         st.warning("Lütfen boş bırakmayın, bir metin girin.")
     else:
-        with st.spinner("Yapay zeka çalışıyor: Seslendirmeniz hazırlanıyor, altyazılar işleniyor..."):
+        with st.spinner("Nexen Engine çalışıyor: Seslendirmeniz hazırlanıyor, altyazılar işleniyor..."):
             audio_file = "temp_audio.mp3"
             output_file = "final_output.mp4"
             
@@ -366,9 +380,8 @@ if st.button("VİDEOYU OLUŞTUR"):
 st.markdown("<br><hr>", unsafe_allow_html=True)
 st.markdown("""
     <div style='text-align: center; color: #9ca3af; font-size: 13px;'>
-        <p>Shorts AI Studio — Tüm hakları saklıdır. © 2026</p>
-        <p>Destek ve İletişim: <a href='mailto:shortaipro@gmail.com' style='color: #c084fc;'>shortaipro@gmail.com</a></p>
-        <p style='font-size: 11px; color: #6b7280;'>Güvenli ödemeler Lemon Squeezy altyapısı ile işlenmektedir.</p>
+        <p>Nexen Engine — Tüm hakları saklıdır. © 2026</p>
+        <p>Destek ve İletişim: <a href='mailto:shortaipro@gmail.com' style='color: #a78bfa; text-decoration: none;'>shortaipro@gmail.com</a></p>
+        <p style='font-size: 11px; color: #4b5563; margin-top: 5px;'>Güvenli ödemeler Lemon Squeezy altyapısı ile işlenmektedir.</p>
     </div>
 """, unsafe_allow_html=True)
-                
