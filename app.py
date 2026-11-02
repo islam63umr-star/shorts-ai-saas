@@ -3,8 +3,8 @@ import json
 import os
 import random
 import smtplib
-from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
 import edge_tts
 from moviepy import AudioFileClip, CompositeVideoClip, TextClip, VideoFileClip
 import streamlit as st
@@ -32,7 +32,7 @@ def save_db(db):
 # --- GMAIL SMTP İLE OTP KOD GÖNDERME FONKSİYONU ---
 def send_otp_email(receiver_email, otp_code):
     sender_email = "shortaipro@gmail.com"
-    app_password = "uswyrmrzmodynsve"  # Şifrən daxil edildi
+    app_password = "uswyrmrzmodynsve"  # Gmail App Password
     
     try:
         msg = MIMEMultipart()
@@ -40,7 +40,7 @@ def send_otp_email(receiver_email, otp_code):
         msg['To'] = receiver_email
         msg['Subject'] = "Nexen - E-Posta Doğrulama Kodu"
         
-        body = f"Nexen platformasına hoş geldiniz!\n\nDoğrulama kodunuz: {otp_code}\n\nBu kodu kimseyle paylaşmayın."
+        body = f"Nexen platformasına xoş gəlmisiniz!\n\nTəsdiq kodunuz: {otp_code}\n\nBu kodu heç kimlə paylaşmayın."
         msg.attach(MIMEText(body, 'plain'))
         
         server = smtplib.SMTP('smtp.gmail.com', 587)
@@ -58,7 +58,7 @@ if "success" in query_params and query_params["success"] == "true":
     st.success("Ödemeniz başarıyla onaylandı. Pro paketinizin aktif olması için lütfen aşağıya e-posta adresinizi yazın.")
 
 # ---------------------------------------------------------
-# NEXEN - ULTRA PREMİUM & GÜVENLİ STİL (TÜRKÇE)
+# NEXEN - ULTRA PREMİUM & GÜVENLİ STİL
 # ---------------------------------------------------------
 st.markdown("""
     <style>
@@ -119,12 +119,6 @@ st.markdown("""
         transform: translateY(-2px);
         box-shadow: 0 15px 35px rgba(124, 58, 237, 0.6);
     }
-    
-    @keyframes pulse-spin {
-        0% { transform: rotate(0deg) scale(1); box-shadow: 0 0 15px rgba(124, 58, 237, 0.4); }
-        50% { transform: rotate(180deg) scale(1.05); box-shadow: 0 0 25px rgba(56, 189, 248, 0.7); }
-        100% { transform: rotate(360deg) scale(1); box-shadow: 0 0 15px rgba(124, 58, 237, 0.4); }
-    }
     .brand-container {
         display: flex;
         align-items: center;
@@ -141,7 +135,6 @@ st.markdown("""
         justify-content: center;
         font-size: 24px;
         color: white;
-        animation: pulse-spin 6s linear infinite;
     }
     .brand-title {
         font-size: 26px;
@@ -161,12 +154,10 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-# ---------------------------------------------------------
-# ÜST BÖLÜM: NEXEN BRANDING & LOGO
-# ---------------------------------------------------------
+# --- ÜST BÖLÜM: BRANDING ---
 st.markdown("""
     <div class="brand-container">
-        <div class="brand-logo">🪩</div>
+        <div class="brand-logo">🎬</div>
         <div>
             <div class="brand-title">Nexen</div>
             <div class="brand-subtitle">Autonomous Short Video Engine</div>
@@ -174,12 +165,12 @@ st.markdown("""
     </div>
 """, unsafe_allow_html=True)
 
-st.markdown("<h1 style='font-size:28px; font-weight:700; margin-bottom:8px;'>Saniyeler İçinde Viral Short'lar Üretin</h1>", unsafe_allow_html=True)
-st.markdown("<p style='color:#9ca3af; font-size:15px;'>Metninizi girin; akıllı altyazı ve stüdyo kalitesinde seslendirme ile videonuz anında hazır olsun.</p>", unsafe_allow_html=True)
+st.markdown("<h1 style='font-size:28px; font-weight:700; margin-bottom:8px;'>Saniyeler İçində Viral Short'lar Üretin</h1>", unsafe_allow_html=True)
+st.markdown("<p style='color:#9ca3af; font-size:15px;'>Metninizi girin; akıllı altyazı və stüdyo kalitesinde seslendirme ile videonuz anında hazır olsun.</p>", unsafe_allow_html=True)
 
-st.markdown('<div class="trust-banner">🔒 Güvenli E-Posta Doğrulama Sistemi • 7/24 Destek: shortaipro@gmail.com</div>', unsafe_allow_html=True)
+st.markdown('<div class="trust-banner">🔒 Güvenli E-Posta Doğrulama Sistemi • 7/24 Dəstək: shortaipro@gmail.com</div>', unsafe_allow_html=True)
 
-# --- SESSION STATE ---
+# --- SESSION STATE & DATABASE ---
 if "otp_sent" not in st.session_state:
     st.session_state.otp_sent = False
 if "generated_otp" not in st.session_state:
@@ -213,30 +204,30 @@ if user_email and "@" in user_email and "." in user_email:
         is_pro_user = db[clean_email]["is_pro"]
     else:
         if not st.session_state.otp_sent:
-            if st.button("Doğrulama Kodu Gönder"):
+            if st.button("Təsdiq Kodu Göndər"):
                 code = str(random.randint(1000, 9999))
                 st.session_state.generated_otp = code
-                with st.spinner("Kod e-posta adresine gönderiliyor..."):
+                with st.spinner("Kod e-poçt ünvanına göndərilir..."):
                     success, err_msg = send_otp_email(clean_email, code)
                     if success:
                         st.session_state.otp_sent = True
-                        st.success("Doğrulama kodu e-posta adresinize gönderildi! Gelen kutunuzu (veya spam) kontrol edin.")
+                        st.success("Təsdiq kodu e-poçtunuza göndərildi! Gələn qutunuzu (və ya spam) yoxlayın.")
                         st.rerun()
                     else:
-                        st.error(f"Kod gönderilemedi! Hata detayı: {err_msg}")
+                        st.error(f"Kod göndəriləmmədi! Xəta: {err_msg}")
         
         if st.session_state.otp_sent and not st.session_state.is_verified:
-            entered_otp = st.text_input("E-Postanıza gelen 4 haneli kodu girin:", max_chars=4)
-            if st.button("Kodu Doğrula"):
+            entered_otp = st.text_input("E-poçtunuza gələn 4 rəqəmli kodu daxil edin:", max_chars=4)
+            if st.button("Kodu Təsdiqlə"):
                 if entered_otp.strip() == st.session_state.generated_otp:
                     st.session_state.is_verified = True
                     db[clean_email] = {"credits": 1, "is_pro": False}
                     save_db(db)
                     current_credits = 1
-                    st.success("E-posta başarıyla doğrulandı! 1 ücretsiz video hakkınız tanımlandı.")
+                    st.success("E-poçt uğurla təsdiqləndi! 1 pulsuz video haqqınız təyin edildi.")
                     st.rerun()
                 else:
-                    st.error("Yanlış kod! Lütfen tekrar deneyin.")
+                    st.error("Yanlış kod! Yenidən yoxlayın.")
 
     if "success" in query_params and query_params["success"] == "true" and st.session_state.is_verified:
         db[clean_email]["is_pro"] = True
@@ -248,18 +239,18 @@ if user_email and "@" in user_email and "." in user_email:
 with col_stat2:
     st.markdown("<br>", unsafe_allow_html=True)
     if not user_email or not st.session_state.is_verified:
-        st.markdown("<div style='background:#1f293d; color:#9ca3af; padding:10px; border-radius:10px; text-align:center; font-size:13px;'>Doğrulama Bekleniyor</div>", unsafe_allow_html=True)
+        st.markdown("<div style='background:#1f293d; color:#9ca3af; padding:10px; border-radius:10px; text-align:center; font-size:13px;'>Təsdiq Gözlənilir</div>", unsafe_allow_html=True)
     elif is_pro_user:
-        st.markdown("<div style='background:rgba(16, 185, 129, 0.15); color:#34d399; border:1px solid rgba(16,185,129,0.3); padding:10px; border-radius:10px; text-align:center; font-weight:600;'>PRO AKTİF</div>", unsafe_allow_html=True)
+        st.markdown("<div style='background:rgba(16, 185, 129, 0.15); color:#34d399; border:1px solid rgba(16,185,129,0.3); padding:10px; border-radius:10px; text-align:center; font-weight:600;'>PRO AKTİV</div>", unsafe_allow_html=True)
     else:
-        st.markdown(f"<div style='background:#121824; color:#fbbf24; border:1px solid rgba(251,191,36,0.2); padding:10px; border-radius:10px; text-align:center; font-weight:600;'>Kalan Hak: {current_credits}</div>", unsafe_allow_html=True)
+        st.markdown(f"<div style='background:#121824; color:#fbbf24; border:1px solid rgba(251,191,36,0.2); padding:10px; border-radius:10px; text-align:center; font-weight:600;'>Qalan Haqq: {current_credits}</div>", unsafe_allow_html=True)
 
 st.markdown("<br>", unsafe_allow_html=True)
 
 # ---------------------------------------------------------
-# ABONELİK PLANLARI (LEMON SQUEEZY LİNKLERİ)
+# ABONELİK PLANLARI (LEMON SQUEEZY)
 # ---------------------------------------------------------
-st.markdown("<h3>Abonelik ve Paket Planları</h3>", unsafe_allow_html=True)
+st.markdown("<h3>Abonelik və Paket Planları</h3>", unsafe_allow_html=True)
 col_p1, col_p2 = st.columns(2)
 
 email_param = f"?checkout[email]={user_email}" if user_email else ""
@@ -270,54 +261,54 @@ with col_p1:
     st.markdown("""
         <div class="pricing-card">
             <h3 style="color: #a78bfa; margin-bottom: 5px; font-size: 18px;">Starter Plan</h3>
-            <h2 style="color: #ffffff; margin-bottom: 12px; font-size: 24px;">$9.99 <span style="font-size: 13px; color: #9ca3af; font-weight: 400;">/ tek seferlik</span></h2>
-            <p style="color: #9ca3af; font-size: 13px;">Temel video üretim özelliklerine erişim.</p>
+            <h2 style="color: #ffffff; margin-bottom: 12px; font-size: 24px;">$9.99 <span style="font-size: 13px; color: #9ca3af; font-weight: 400;">/ tək seferlik</span></h2>
+            <p style="color: #9ca3af; font-size: 13px;">Təməl video istehsal xüsusiyyətləri.</p>
         </div>
     """, unsafe_allow_html=True)
-    st.link_button("Starter Plan Satın Al", starter_link, type="secondary", use_container_width=True)
+    st.link_button("Starter Plan Al", starter_link, type="secondary", use_container_width=True)
 
 with col_p2:
     st.markdown("""
         <div class="pricing-card">
             <h3 style="color: #38bdf8; margin-bottom: 5px; font-size: 18px;">Pro Plan</h3>
-            <h2 style="color: #ffffff; margin-bottom: 12px; font-size: 24px;">$29.99 <span style="font-size: 13px; color: #9ca3af; font-weight: 400;">/ tek seferlik</span></h2>
-            <p style="color: #9ca3af; font-size: 13px;">Tüm video araçlarına ve sınırsız özelliklere tam erişim.</p>
+            <h2 style="color: #ffffff; margin-bottom: 12px; font-size: 24px;">$29.99 <span style="font-size: 13px; color: #9ca3af; font-weight: 400;">/ tək seferlik</span></h2>
+            <p style="color: #9ca3af; font-size: 13px;">Bütün alətlərə və limitsiz imkanlara tam erişim.</p>
         </div>
     """, unsafe_allow_html=True)
-    st.link_button("Pro Plan Satın Al", pro_link, type="primary", use_container_width=True)
+    st.link_button("Pro Plan Al", pro_link, type="primary", use_container_width=True)
 
 st.divider()
 st.markdown("<br>", unsafe_allow_html=True)
 
 # ---------------------------------------------------------
-# VİDEO OLUŞTURMA PANELİ
+# VİDEO OLUŞTURMA PANELİ (GİTHUB-DAN .MP4 ARKA PLAN İLE)
 # ---------------------------------------------------------
 st.markdown('<div class="main-box">', unsafe_allow_html=True)
-st.markdown("### **Adım 1:** Metninizi veya Senaryonuzu Girin", unsafe_allow_html=True)
+st.markdown("### **Addım 1:** Mətninizi və ya Ssenarinizi Daxil Edin", unsafe_allow_html=True)
 
 text_input = st.text_area(
-    "Metin:",
+    "Mətn:",
     value="",
     height=130,
-    placeholder="Videoda okunmasını istediğiniz metni veya senaryoyu buraya yazın...",
+    placeholder="Videoda oxunmasını istədiyiniz mətni bura yazın...",
     label_visibility="collapsed"
 )
 
 st.markdown("<br>", unsafe_allow_html=True)
-st.markdown("### **Adım 2:** Ses ve Görsel Tasarım Ayarları", unsafe_allow_html=True)
+st.markdown("### **Addım 2:** Səs və Dizayn Ayarları", unsafe_allow_html=True)
 
 col1, col2 = st.columns(2)
 with col1:
     voice = st.selectbox(
-        "Ses Modeli:",
+        "Səs Modeli:",
         [
-            "Ahmet (Doğal Erkek - Popüler)",
-            "Emel (Dinamik Kadın)",
-            "Cenk (Tok & Ciddi Erkek)"
+            "Ahmet (Təbii Kişi)",
+            "Emel (Dinamik Qadın)",
+            "Cenk (Tok Kişi)"
         ]
     )
 with col2:
-    font_size = st.slider("Altyazı Boyutu:", 30, 50, 40)
+    font_size = st.slider("Altyazı Ölçüsü:", 30, 50, 40)
 
 st.markdown("</div>", unsafe_allow_html=True)
 
@@ -332,22 +323,23 @@ async def generate_audio(text, voice_name, output_path):
     communicate = edge_tts.Communicate(text, voice_name, rate="+8%", pitch="+2Hz")
     await communicate.save(output_path)
 
-if st.button("VİDEOYU OLUŞTUR"):
+if st.button("VİDEONU YARAT"):
     if not st.session_state.is_verified:
-        st.warning("Video üretmeden önce lütfen e-posta adresinizi yazın ve doğrulama kodunu girerek hesabınızı aktive edin.")
+        st.warning("Video yaratmamışdan əvvəl zəhmət olmasa e-poçt ünvanınızı yazın və təsdiq kodunu daxil edin.")
     elif current_credits <= 0 and not is_pro_user:
-        st.error("Ücretsiz kullanım hakkınız kalmamıştır. Sınırsız video üretmek için lütfen yukarıdaki paketlerden birini satın alın.")
+        st.error("Pulsuz istifadə haqqınız bitmişdir. Limitsiz video yaratmaq üçün yuxarıdakı paketlərdən birini alın.")
     elif not text_input.strip():
-        st.warning("Lütfen boş bırakmayın, bir metin girin.")
+        st.warning("Zəhmət olmasa boş saxlamayın, bir mətn daxil edin.")
     else:
-        with st.spinner("Nexen Engine çalışıyor: Seslendirmeniz hazırlanıyor, altyazılar işleniyor..."):
+        with st.spinner("Nexen Engine işləyir: Səsləndirmə hazırlanır, altyazılar işlənir..."):
             audio_file = "temp_audio.mp3"
             output_file = "final_output.mp4"
             
+            # GitHub reposundan .mp4 arxa plan fayllarını tapır
             available_bgs = sorted([f for f in os.listdir(".") if f.endswith(".mp4") and f != "final_output.mp4"])
             
             if not available_bgs:
-                st.error("Hata: Sunucuda hiç arka plan videosu bulunamadı. Lütfen GitHub deposuna .mp4 uzantılı videolar yükleyin.")
+                st.error("Xəta: Serverdə heç bir arxa plan videosu tapılmadı. Lütfən GitHub deposuna .mp4 uzantılı videolar yükləyin.")
             else:
                 candidates = available_bgs
                 if len(available_bgs) > 1 and "last_bg" in st.session_state and st.session_state.last_bg in available_bgs:
@@ -364,8 +356,7 @@ if st.button("VİDEOYU OLUŞTUR"):
                     
                     if video.duration > audio.duration:
                         max_start = video.duration - audio.duration
-                        import random as r_time
-                        start_time = r_time.uniform(0, max_start)
+                        start_time = random.uniform(0, max_start)
                         end_time = start_time + audio.duration
                         video = video.subclipped(start_time, end_time)
                     else:
@@ -422,12 +413,12 @@ if st.button("VİDEOYU OLUŞTUR"):
                         save_db(db)
                     
                     st.markdown('<div class="main-box">', unsafe_allow_html=True)
-                    st.success("Videonuz başarıyla oluşturuldu.")
+                    st.success("Videonuz uğurla yaradıldı!")
                     st.video(output_file)
                     
                     with open(output_file, "rb") as file:
                         st.download_button(
-                            label="VİDEOYU İNDİR (1080P)",
+                            label="VİDEONU YÜKLƏ (1080P)",
                             data=file,
                             file_name="viral_short_pro.mp4",
                             mime="video/mp4"
@@ -435,17 +426,13 @@ if st.button("VİDEOYU OLUŞTUR"):
                     st.markdown("</div>", unsafe_allow_html=True)
                     
                 except Exception as e:
-                    st.error(f"İşlem sırasında bir hata oluştu: {e}")
+                    st.error(f"Video emalı zamanı xəta baş verdi: {e}")
 
-# ---------------------------------------------------------
-# ALT BİLGİ (FOOTER)
-# ---------------------------------------------------------
+# --- FOOTER ---
 st.markdown("<br><hr>", unsafe_allow_html=True)
 st.markdown("""
     <div style='text-align: center; color: #9ca3af; font-size: 13px;'>
-        <p>Nexen Engine — Tüm hakları saklıdır. © 2026</p>
-        <p>Destek ve İletişim: <a href='mailto:shortaipro@gmail.com' style='color: #a78bfa; text-decoration: none;'>shortaipro@gmail.com</a></p>
-        <p style='font-size: 11px; color: #4b5563; margin-top: 5px;'>Güvenli ödemeler Lemon Squeezy altyapısı ile işlenmektedir.</p>
+        <p>Nexen Engine — Bütün hüquqlar qorunur. © 2026</p>
+        <p>Dəstək: <a href='mailto:shortaipro@gmail.com' style='color: #a78bfa; text-decoration: none;'>shortaipro@gmail.com</a></p>
     </div>
 """, unsafe_allow_html=True)
-        
