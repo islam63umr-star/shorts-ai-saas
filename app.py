@@ -7,7 +7,7 @@ from moviepy import AudioFileClip, CompositeVideoClip, TextClip, VideoFileClip
 import streamlit as st
 
 st.set_page_config(
-    page_title="Shorts AI Studio | Pro Creator", page_icon="✨", layout="centered"
+    page_title="Shorts AI Studio | Pro Creator", page_icon="⚡", layout="centered"
 )
 
 # --- VERİTABANI YÖNETİMİ (JSON) ---
@@ -29,10 +29,10 @@ def save_db(db):
 # --- URL SORGULARI VE ÖDEME KONTROLÜ ---
 query_params = st.query_params
 if "success" in query_params and query_params["success"] == "true":
-    st.success("🎉 Ödemeniz başarıyla onaylandı! Pro paketinizin aktif olması için lütfen aşağıya e-posta adresinizi yazın.")
+    st.success("Ödemeniz başarıyla onaylandı. Pro paketinizin aktif olması için lütfen aşağıya e-posta adresinizi yazın.")
 
 # ---------------------------------------------------------
-# PROFESSIONAL SAAS & GÜVEN VERİCİ TASARIM (TÜRKÇE)
+# PROFESSIONAL SAAS & BRANDED UI (ÖZEL LOGO VE STİL)
 # ---------------------------------------------------------
 st.markdown("""
     <style>
@@ -91,29 +91,59 @@ st.markdown("""
         transform: translateY(-2px);
         box-shadow: 0 15px 30px rgba(168, 85, 247, 0.6);
     }
-    .badge {
-        background: rgba(168, 85, 247, 0.15);
-        color: #c084fc;
-        padding: 6px 14px;
-        border-radius: 30px;
-        font-size: 12px;
-        font-weight: 700;
-        border: 1px solid rgba(168, 85, 247, 0.3);
-        display: inline-block;
-        margin-bottom: 15px;
+    
+    /* HƏRƏKƏTLİ (FIRLANAN) ÖZƏL SÜNİ İNTELLEKT LOGOSU */
+    @keyframes spin-slow {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+    .ai-logo-container {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        margin-bottom: 20px;
+    }
+    .rotating-logo {
+        width: 45px;
+        height: 45px;
+        background: linear-gradient(135deg, #6366f1, #a855f7, #38bdf8);
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 22px;
+        box-shadow: 0 0 20px rgba(168, 85, 247, 0.5);
+        animation: spin-slow 8s linear infinite;
+    }
+    .brand-title {
+        font-size: 24px;
+        font-weight: 800;
+        background: linear-gradient(90deg, #ffffff, #c084fc);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        letter-spacing: -0.5px;
     }
     </style>
 """, unsafe_allow_html=True)
 
 # ---------------------------------------------------------
-# ANA EKRAN & KULLANICI E-POSTA GİRİŞİ
+# ÜST BÖLMƏ: FIRLANAN ÖZƏL LOGO VƏ BREND
 # ---------------------------------------------------------
-st.markdown('<div><span class="badge">✨ YAPAY ZEKA DESTEKLİ VİRAL SHORTS ÜRETİCİ</span></div>', unsafe_allow_html=True)
-st.markdown("<h1 style='font-size:32px; font-weight:800; margin-bottom:5px;'>Saniyeler İçinde Viral Short'lar Üretin</h1>", unsafe_allow_html=True)
-st.markdown("<p style='color:#9ca3af; font-size:15px;'>İstediğiniz konuyu yazın; kusursuz altyazı ve yüksek kaliteli yapay zeka seslendirmesi ile videonuz anında hazır olsun.</p>", unsafe_allow_html=True)
+st.markdown("""
+    <div class="ai-logo-container">
+        <div class="rotating-logo">⚡</div>
+        <div>
+            <div class="brand-title">Shorts AI Studio</div>
+            <div style="font-size: 12px; color: #9ca3af; font-weight: 500;">Next-Gen Autonomous Video Engine</div>
+        </div>
+    </div>
+""", unsafe_allow_html=True)
 
-# Güvən nişanı (Trust Badge)
-st.markdown('<div class="trust-badge">🔒 Güvenli Ödeme Altyapısı • 7/24 Destek: shortaipro@gmail.com • Anında Teslimat</div>', unsafe_allow_html=True)
+st.markdown("<h1 style='font-size:30px; font-weight:800; margin-bottom:5px;'>Saniyeler İçinde Viral Short'lar Üretin</h1>", unsafe_allow_html=True)
+st.markdown("<p style='color:#9ca3af; font-size:15px;'>Metninizi girin; yapay zeka destekli akıllı altyazı ve stüdyo kalitesinde seslendirme ile videonuz anında hazır olsun.</p>", unsafe_allow_html=True)
+
+# Güvən nişanı
+st.markdown('<div class="trust-badge">Güvenli Ödeme Altyapısı • 7/24 Destek: shortaipro@gmail.com • Anında Teslimat</div>', unsafe_allow_html=True)
 
 col_stat1, col_stat2 = st.columns([2, 1])
 with col_stat1:
@@ -142,18 +172,18 @@ if user_email and "@" in user_email:
 with col_stat2:
     st.markdown("<br>", unsafe_allow_html=True)
     if not user_email:
-        st.markdown("<div style='background:#374151; color:#f3f4f6; padding:10px; border-radius:10px; text-align:center; font-size:13px;'>📧 E-posta Girin</div>", unsafe_allow_html=True)
+        st.markdown("<div style='background:#374151; color:#f3f4f6; padding:10px; border-radius:10px; text-align:center; font-size:13px;'>E-posta Girin</div>", unsafe_allow_html=True)
     elif is_pro_user:
-        st.markdown("<div style='background:#065f46; color:#34d399; padding:10px; border-radius:10px; text-align:center; font-weight:bold;'>👑 PRO AKTİF</div>", unsafe_allow_html=True)
+        st.markdown("<div style='background:#065f46; color:#34d399; padding:10px; border-radius:10px; text-align:center; font-weight:bold;'>PRO AKTİF</div>", unsafe_allow_html=True)
     else:
-        st.markdown(f"<div style='background:#1f2937; color:#fbbf24; padding:10px; border-radius:10px; text-align:center; font-weight:bold;'>🎁 Kalan Hak: {current_credits}</div>", unsafe_allow_html=True)
+        st.markdown(f"<div style='background:#1f2937; color:#fbbf24; padding:10px; border-radius:10px; text-align:center; font-weight:bold;'>Kalan Hak: {current_credits}</div>", unsafe_allow_html=True)
 
 st.markdown("<br>", unsafe_allow_html=True)
 
 # ---------------------------------------------------------
 # ABONELİK PLANLARI (LEMON SQUEEZY LİNKLƏRİ)
 # ---------------------------------------------------------
-st.markdown("<h3>💳 Abonelik ve Paket Planları (Starter / Pro)</h3>", unsafe_allow_html=True)
+st.markdown("<h3>Abonelik ve Paket Planları</h3>", unsafe_allow_html=True)
 col_p1, col_p2 = st.columns(2)
 
 email_param = f"?checkout[email]={user_email}" if user_email else ""
@@ -168,7 +198,7 @@ with col_p1:
             <p style="color: #9ca3af; font-size: 13px;">Temel yapay zeka video üretim özelliklerine erişim.</p>
         </div>
     """, unsafe_allow_html=True)
-    st.link_button("👉 Starter Plan Satın Al", starter_link, type="secondary", use_container_width=True)
+    st.link_button("Starter Plan Satın Al", starter_link, type="secondary", use_container_width=True)
 
 with col_p2:
     st.markdown("""
@@ -178,7 +208,7 @@ with col_p2:
             <p style="color: #9ca3af; font-size: 13px;">Tüm AI video araçlarına ve sınırsız özelliklere tam erişim.</p>
         </div>
     """, unsafe_allow_html=True)
-    st.link_button("👉 Pro Plan Satın Al", pro_link, type="primary", use_container_width=True)
+    st.link_button("Pro Plan Satın Al", pro_link, type="primary", use_container_width=True)
 
 st.divider()
 st.markdown("<br>", unsafe_allow_html=True)
@@ -187,7 +217,7 @@ st.markdown("<br>", unsafe_allow_html=True)
 # VİDEO OLUŞTURMA PANELİ
 # ---------------------------------------------------------
 st.markdown('<div class="main-box">', unsafe_allow_html=True)
-st.markdown("### 📝 **Adım 1:** Metninizi veya Senaryonuzu Girin", unsafe_allow_html=True)
+st.markdown("### **Adım 1:** Metninizi veya Senaryonuzu Girin", unsafe_allow_html=True)
 
 text_input = st.text_area(
     "Metin:",
@@ -198,16 +228,16 @@ text_input = st.text_area(
 )
 
 st.markdown("<br>", unsafe_allow_html=True)
-st.markdown("### 🎙️ **Adım 2:** Ses ve Görsel Tasarım Ayarları", unsafe_allow_html=True)
+st.markdown("### **Adım 2:** Ses ve Görsel Tasarım Ayarları", unsafe_allow_html=True)
 
 col1, col2 = st.columns(2)
 with col1:
     voice = st.selectbox(
         "Ses Modeli:",
         [
-            "🇹🇷 Ahmet (Doğal Erkek - Popüler)",
-            "🇹🇷 Emel (Dinamik Kadın)",
-            "🇹🇷 Cenk (Tok & Ciddi Erkek)"
+            "Ahmet (Doğal Erkek - Popüler)",
+            "Emel (Dinamik Kadın)",
+            "Cenk (Tok & Ciddi Erkek)"
         ]
     )
 with col2:
@@ -226,22 +256,22 @@ async def generate_audio(text, voice_name, output_path):
     communicate = edge_tts.Communicate(text, voice_name, rate="+8%", pitch="+2Hz")
     await communicate.save(output_path)
 
-if st.button("✨ VİDEOYU SİHİRLİ ŞEKİLDE OLUŞTUR"):
+if st.button("VİDEOYU OLUŞTUR"):
     if not user_email or "@" not in user_email:
-        st.warning("⚠️ Video üretmeden önce lütfen üst kısıma geçerli bir e-posta adresi girin!")
+        st.warning("Video üretmeden önce lütfen üst kısıma geçerli bir e-posta adresi girin.")
     elif current_credits <= 0 and not is_pro_user:
-        st.error("⚠️ Ücretsiz kullanım hakkınız kalmamıştır! Sınırsız video üretmek için lütfen yukarıdaki paketlerden birini satın alın.")
+        st.error("Ücretsiz kullanım hakkınız kalmamıştır. Sınırsız video üretmek için lütfen yukarıdaki paketlerden birini satın alın.")
     elif not text_input.strip():
-        st.warning("⚠️ Lütfen boş bırakmayın, bir metin girin!")
+        st.warning("Lütfen boş bırakmayın, bir metin girin.")
     else:
-        with st.spinner("🚀 Yapay zeka çalışıyor: Ultra gerçekçi seslendirmeniz hazırlanıyor, altyazılar işleniyor..."):
+        with st.spinner("Yapay zeka çalışıyor: Seslendirmeniz hazırlanıyor, altyazılar işleniyor..."):
             audio_file = "temp_audio.mp3"
             output_file = "final_output.mp4"
             
             available_bgs = sorted([f for f in os.listdir(".") if f.endswith(".mp4") and f != "final_output.mp4"])
             
             if not available_bgs:
-                st.error("Hata: Sunucuda hiç arka plan videosu bulunamadı! Lütfen GitHub deposuna .mp4 uzantılı videolar yükleyin.")
+                st.error("Hata: Sunucuda hiç arka plan videosu bulunamadı. Lütfen GitHub deposuna .mp4 uzantılı videolar yükleyin.")
             else:
                 candidates = available_bgs
                 if len(available_bgs) > 1 and "last_bg" in st.session_state and st.session_state.last_bg in available_bgs:
@@ -315,12 +345,12 @@ if st.button("✨ VİDEOYU SİHİRLİ ŞEKİLDE OLUŞTUR"):
                         save_db(db)
                     
                     st.markdown('<div class="main-box">', unsafe_allow_html=True)
-                    st.success("🎉 Videonuz başarıyla oluşturuldu!")
+                    st.success("Videonuz başarıyla oluşturuldu.")
                     st.video(output_file)
                     
                     with open(output_file, "rb") as file:
                         st.download_button(
-                            label="📥 VİDEOYU İNDİR (1080P)",
+                            label="VİDEOYU İNDİR (1080P)",
                             data=file,
                             file_name="viral_short_pro.mp4",
                             mime="video/mp4"
@@ -331,7 +361,7 @@ if st.button("✨ VİDEOYU SİHİRLİ ŞEKİLDE OLUŞTUR"):
                     st.error(f"İşlem sırasında bir hata oluştu: {e}")
 
 # ---------------------------------------------------------
-# ALT BİLGİ (FOOTER) - ETİBAR VE İLETİŞİM
+# ALT BİLGİ (FOOTER)
 # ---------------------------------------------------------
 st.markdown("<br><hr>", unsafe_allow_html=True)
 st.markdown("""
@@ -341,4 +371,4 @@ st.markdown("""
         <p style='font-size: 11px; color: #6b7280;'>Güvenli ödemeler Lemon Squeezy altyapısı ile işlenmektedir.</p>
     </div>
 """, unsafe_allow_html=True)
-                          
+                
