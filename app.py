@@ -29,7 +29,7 @@ def save_db(db):
     with open(DB_FILE, "w") as f:
         json.dump(db, f)
 
-# --- GMAIL SMTP İLE OTP KOD GÖNDERME FONKSİYONU ---
+# --- GMAIL SMTP İLE OTP KOD GÖNDERME FONKSİYONU (GÜCLƏNDİRİLMİŞ) ---
 def send_otp_email(receiver_email, otp_code):
     sender_email = "shortaipro@gmail.com"
     app_password = "uswyrmrzmodynsve"  # Şifrən daxil edildi
@@ -43,14 +43,23 @@ def send_otp_email(receiver_email, otp_code):
         body = f"Nexen platformasına hoş geldiniz!\n\nDoğrulama kodunuz: {otp_code}\n\nBu kodu kimseyle paylaşmayın."
         msg.attach(MIMEText(body, 'plain'))
         
-        server = smtplib.SMTP('smtp.gmail.com', 587)
-        server.starttls()
+        # Port 465 (SSL) ilə birbaşa və təhlükəsiz bağlantı
+        server = smtplib.SMTP_SSL('smtp.gmail.com', 465)
         server.login(sender_email, app_password)
         server.sendmail(sender_email, receiver_email, msg.as_string())
         server.quit()
         return True, "Başarılı"
     except Exception as e:
-        return False, str(e)
+        # Əgər port 465 bloklanıbsa, port 587 (TLS) ilə ehtiyat bağlantı yoxlayırıq
+        try:
+            server = smtplib.SMTP('smtp.gmail.com', 587)
+            server.starttls()
+            server.login(sender_email, app_password)
+            server.sendmail(sender_email, receiver_email, msg.as_string())
+            server.quit()
+            return True, "Başarılı"
+        except Exception as e2:
+            return False, f"Port 465: {str(e)} | Port 587: {str(e2)}"
 
 # --- URL SORGULARI VE ÖDEME KONTROLÜ ---
 query_params = st.query_params
@@ -250,7 +259,7 @@ with col_stat2:
     if not user_email or not st.session_state.is_verified:
         st.markdown("<div style='background:#1f293d; color:#9ca3af; padding:10px; border-radius:10px; text-align:center; font-size:13px;'>Doğrulama Bekleniyor</div>", unsafe_allow_html=True)
     elif is_pro_user:
-        st.markdown("<div style='background:rgba(16, 185, 129, 0.15); color:#34d399; border:1px solid rgba(16,185,129,0.3); padding:10px; border-radius:10px; text-align:center; font-weight:600;'>PRO AKTİF</div>", unsafe_allow_html=True)
+        st.markdown("<div style='background:rgba(16, 185, 129, 0.15); color:#34d399; border:1px solid rgba(16,185,129,0.3); padding:10px; border-radius:10px; text-align:center; font-weight:600;'>PRO AKTİV</div>", unsafe_allow_html=True)
     else:
         st.markdown(f"<div style='background:#121824; color:#fbbf24; border:1px solid rgba(251,191,36,0.2); padding:10px; border-radius:10px; text-align:center; font-weight:600;'>Kalan Hak: {current_credits}</div>", unsafe_allow_html=True)
 
@@ -448,4 +457,3 @@ st.markdown("""
         <p style='font-size: 11px; color: #4b5563; margin-top: 5px;'>Güvenli ödemeler Lemon Squeezy altyapısı ile işlenmektedir.</p>
     </div>
 """, unsafe_allow_html=True)
-    
