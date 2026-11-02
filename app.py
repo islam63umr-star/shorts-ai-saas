@@ -203,6 +203,7 @@ if user_email and "@" in user_email and "." in user_email:
         current_credits = db[clean_email]["credits"]
         is_pro_user = db[clean_email]["is_pro"]
     else:
+        # E-poçt daxil edilibsə və hələ təsdiqlənməyibsə kod göndərmə paneli
         if not st.session_state.otp_sent:
             if st.button("Təsdiq Kodu Göndər"):
                 code = str(random.randint(1000, 9999))
@@ -216,6 +217,7 @@ if user_email and "@" in user_email and "." in user_email:
                     else:
                         st.error(f"Kod göndəriləmmədi! Xəta: {err_msg}")
         
+        # Kod göndərildikdən sonra daxil etmə xanası
         if st.session_state.otp_sent and not st.session_state.is_verified:
             entered_otp = st.text_input("E-poçtunuza gələn 4 rəqəmli kodu daxil edin:", max_chars=4)
             if st.button("Kodu Təsdiqlə"):
@@ -281,7 +283,7 @@ st.divider()
 st.markdown("<br>", unsafe_allow_html=True)
 
 # ---------------------------------------------------------
-# VİDEO OLUŞTURMA PANELİ (GİTHUB-DAN .MP4 ARKA PLAN İLE)
+# VİDEO OLUŞTURMA PANELİ
 # ---------------------------------------------------------
 st.markdown('<div class="main-box">', unsafe_allow_html=True)
 st.markdown("### **Addım 1:** Mətninizi və ya Ssenarinizi Daxil Edin", unsafe_allow_html=True)
@@ -335,7 +337,6 @@ if st.button("VİDEONU YARAT"):
             audio_file = "temp_audio.mp3"
             output_file = "final_output.mp4"
             
-            # GitHub reposundan .mp4 arxa plan fayllarını tapır
             available_bgs = sorted([f for f in os.listdir(".") if f.endswith(".mp4") and f != "final_output.mp4"])
             
             if not available_bgs:
@@ -436,3 +437,4 @@ st.markdown("""
         <p>Dəstək: <a href='mailto:shortaipro@gmail.com' style='color: #a78bfa; text-decoration: none;'>shortaipro@gmail.com</a></p>
     </div>
 """, unsafe_allow_html=True)
+    
