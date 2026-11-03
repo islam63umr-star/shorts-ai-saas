@@ -106,7 +106,6 @@ st.markdown("""
         box-shadow: 0 15px 35px rgba(139, 92, 246, 0.7);
     }
     
-    /* Peşəkar Nexen fırlanan loqo animasiyası (Şimşək əvəzinə hiper-modern neon loqo) */
     @keyframes nexen-pro-spin {
         0% { transform: rotate(0deg) scale(1); filter: drop-shadow(0 0 8px rgba(139, 92, 246, 0.8)); }
         50% { transform: rotate(180deg) scale(1.12); filter: drop-shadow(0 0 25px rgba(56, 189, 248, 1)); }
@@ -137,8 +136,6 @@ st.markdown("""
         margin: 2rem 0;
         box-shadow: 0 25px 50px rgba(0,0,0,0.8);
     }
-    
-    /* Peşəkar Üst Brend Dizaynı (Şimşək əvəzinə möhtəşəm simvol) */
     .pro-brand-container {
         display: flex;
         align-items: center;
@@ -181,7 +178,7 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # ---------------------------------------------------------
-# ÜST BÖLÜM: PEŞƏKAR NEXEN BRANDING (ŞİMŞƏKSİZ, PREMIUM)
+# ÜST BÖLÜM: PEŞƏKAR NEXEN BRANDING
 # ---------------------------------------------------------
 st.markdown("""
     <div class="pro-brand-container">
@@ -204,7 +201,6 @@ db = load_db()
 if "user_email" not in st.session_state:
     st.session_state.user_email = None
 
-# Google OAuth qayıdış kodu yoxlanışı
 query_params = st.query_params
 if "code" in query_params and not st.session_state.user_email:
     verified_email = "verified.nexen.user@gmail.com"
@@ -349,7 +345,7 @@ if st.button("VİDEONU İSTEHSAL ET"):
     elif not text_input.strip():
         st.warning("Zəhmət olmasa boş saxlamayın, bir mətn daxil edin.")
     else:
-        # Fırlanan peşəkar loqo ilə gözləmə ekranı (Boş mətn əvəzinə hiper-modern NX loqosu)
+        # Fırlanan peşəkar loqo ilə gözləmə ekranı
         loader_placeholder = st.empty()
         with loader_placeholder.container():
             st.markdown("""
@@ -377,7 +373,8 @@ if st.button("VİDEONU İSTEHSAL ET"):
                 background_video = random.choice(candidates)
                 st.session_state.last_bg = background_video
                 
-                await generate_audio(text_input, voice_code, audio_file)
+                # Asinxron səsin sinxron çağırılması (await xətasını aradan qaldırır)
+                asyncio.run(generate_audio(text_input, voice_code, audio_file))
                 
                 video = VideoFileClip(background_video)
                 audio = AudioFileClip(audio_file)
@@ -470,4 +467,4 @@ st.markdown("""
         <p>Dəstək: <a href='mailto:shortaipro@gmail.com' style='color: #a78bfa; text-decoration: none;'>shortaipro@gmail.com</a></p>
     </div>
 """, unsafe_allow_html=True)
-    
+        
