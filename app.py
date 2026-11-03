@@ -29,7 +29,7 @@ def save_db(db):
     with open(DB_FILE, "w") as f:
         json.dump(db, f)
 
-# --- GMAIL SMTP İLE OTP KOD GÖNDERME FONKSİYONU (GÜCLƏNDİRİLMİŞ) ---
+# --- GMAIL SMTP İLE OTP KOD GÖNDERME FONKSİYONU ---
 def send_otp_email(receiver_email, otp_code):
     sender_email = "shortaipro@gmail.com"
     app_password = "uswyrmrzmodynsve"  # Şifrən daxil edildi
@@ -43,23 +43,14 @@ def send_otp_email(receiver_email, otp_code):
         body = f"Nexen platformasına hoş geldiniz!\n\nDoğrulama kodunuz: {otp_code}\n\nBu kodu kimseyle paylaşmayın."
         msg.attach(MIMEText(body, 'plain'))
         
-        # Port 465 (SSL) ilə birbaşa və təhlükəsiz bağlantı
-        server = smtplib.SMTP_SSL('smtp.gmail.com', 465)
+        server = smtplib.SMTP('smtp.gmail.com', 587)
+        server.starttls()
         server.login(sender_email, app_password)
         server.sendmail(sender_email, receiver_email, msg.as_string())
         server.quit()
         return True, "Başarılı"
     except Exception as e:
-        # Əgər port 465 bloklanıbsa, port 587 (TLS) ilə ehtiyat bağlantı yoxlayırıq
-        try:
-            server = smtplib.SMTP('smtp.gmail.com', 587)
-            server.starttls()
-            server.login(sender_email, app_password)
-            server.sendmail(sender_email, receiver_email, msg.as_string())
-            server.quit()
-            return True, "Başarılı"
-        except Exception as e2:
-            return False, f"Port 465: {str(e)} | Port 587: {str(e2)}"
+        return False, str(e)
 
 # --- URL SORGULARI VE ÖDEME KONTROLÜ ---
 query_params = st.query_params
@@ -457,3 +448,4 @@ st.markdown("""
         <p style='font-size: 11px; color: #4b5563; margin-top: 5px;'>Güvenli ödemeler Lemon Squeezy altyapısı ile işlenmektedir.</p>
     </div>
 """, unsafe_allow_html=True)
+    
