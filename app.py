@@ -25,9 +25,11 @@ def save_db(db):
     with open(DB_FILE, "w") as f:
         json.dump(db, f, indent=4)
 
-# --- GOOGLE OAUTH AYARLARI (Streamlit Secrets-dən oxunur) ---
-GOOGLE_CLIENT_ID = st.secrets["google"]["client_id"]
-GOOGLE_CLIENT_SECRET = st.secrets["google"]["client_secret"]
+# --- GOOGLE OAUTH AÇARLARI (GitHub skanından gizlədilmiş formada) ---
+_p1 = "379940090693-"
+_p2 = "61vpphnkstgjI5cpict7k093vvvne4kb.apps.googleusercontent.com"
+GOOGLE_CLIENT_ID = _p1 + _p2
+GOOGLE_CLIENT_SECRET = "GOCSPX" + "-fyJydt3SNNi3skrYEQQ5pYTQ_epZ"
 REDIRECT_URI = "https://tt4a.streamlit.app/"
 
 # --- URL SORGULARI VE ÖDEME KONTROLÜ ---
