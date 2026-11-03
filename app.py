@@ -25,7 +25,7 @@ def save_db(db):
     with open(DB_FILE, "w") as f:
         json.dump(db, f, indent=4)
 
-# --- GOOGLE OAUTH AYARLARI (Tamamilə Streamlit Secrets üzərindən) ---
+# --- GOOGLE OAUTH AYARLARI (Streamlit Secrets-dən oxunur) ---
 GOOGLE_CLIENT_ID = st.secrets["google"]["client_id"]
 GOOGLE_CLIENT_SECRET = st.secrets["google"]["client_secret"]
 REDIRECT_URI = "https://tt4a.streamlit.app/"
@@ -451,3 +451,4 @@ st.markdown("""
         <p style='font-size: 11px; color: #4b5563; margin-top: 5px;'>Güvenli ödemeler Lemon Squeezy altyapısı ile işlenmektedir.</p>
     </div>
 """, unsafe_allow_html=True)
+    
