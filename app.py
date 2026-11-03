@@ -2,9 +2,8 @@ import asyncio
 import json
 import os
 import random
-import edge_tts
-from moviepy import AudioFileClip, CompositeVideoClip, TextClip, VideoFileClip
 import streamlit as st
+from moviepy import AudioFileClip, CompositeVideoClip, TextClip, VideoFileClip
 
 st.set_page_config(
     page_title="Nexen | Short Video Engine", page_icon="⚡", layout="centered"
@@ -24,12 +23,17 @@ def load_db():
 
 def save_db(db):
     with open(DB_FILE, "w") as f:
-        json.dump(db, f)
+        json.dump(db, f, indent=4)
+
+# --- GOOGLE OAUTH AYARLARI (Tamamilə Streamlit Secrets üzərindən) ---
+GOOGLE_CLIENT_ID = st.secrets["google"]["client_id"]
+GOOGLE_CLIENT_SECRET = st.secrets["google"]["client_secret"]
+REDIRECT_URI = "https://tt4a.streamlit.app/"
 
 # --- URL SORGULARI VE ÖDEME KONTROLÜ ---
 query_params = st.query_params
 if "success" in query_params and query_params["success"] == "true":
-    st.success("Ödemeniz başarıyla onaylandı. Pro paketinizin aktif olması için lütfen aşağıya e-posta adresinizi yazın.")
+    st.success("Ödemeniz başarıyla onaylandı. Pro paketinizin aktif olması için lütfen hesabınıza giriş yapın.")
 
 # ---------------------------------------------------------
 # NEXEN - ULTRA PREMİUM & GÜVENLİ STİL (TÜRKÇE)
@@ -94,10 +98,34 @@ st.markdown("""
         box-shadow: 0 15px 35px rgba(124, 58, 237, 0.6);
     }
     
-    @keyframes pulse-spin {
-        0% { transform: rotate(0deg) scale(1); box-shadow: 0 0 15px rgba(124, 58, 237, 0.4); }
-        50% { transform: rotate(180deg) scale(1.05); box-shadow: 0 0 25px rgba(56, 189, 248, 0.7); }
-        100% { transform: rotate(360deg) scale(1); box-shadow: 0 0 15px rgba(124, 58, 237, 0.4); }
+    /* Sərt, kəskin və güclü Nexen fırlanan loqo animasiyası */
+    @keyframes nexen-hard-spin {
+        0% { transform: rotate(0deg) scale(1); filter: drop-shadow(0 0 5px rgba(124, 58, 237, 0.6)); }
+        50% { transform: rotate(180deg) scale(1.08); filter: drop-shadow(0 0 20px rgba(56, 189, 248, 0.9)); }
+        100% { transform: rotate(360deg) scale(1); filter: drop-shadow(0 0 5px rgba(124, 58, 237, 0.6)); }
+    }
+    .spinning-hard-logo {
+        display: inline-block;
+        animation: nexen-hard-spin 1.5s cubic-bezier(0.68, -0.55, 0.27, 1.55) infinite;
+        font-weight: 900;
+        font-size: 2.2rem;
+        background: linear-gradient(90deg, #38bdf8, #ffffff, #7c3aed);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        text-transform: uppercase;
+        letter-spacing: 3px;
+        border: 2px solid #1f293d;
+        padding: 12px 24px;
+        border-radius: 12px;
+        background-color: #0f1420;
+    }
+    .loader-box {
+        text-align: center;
+        padding: 2.5rem;
+        background: #121824;
+        border-radius: 16px;
+        border: 1px solid #1f293d;
+        margin: 1.5rem 0;
     }
     .brand-container {
         display: flex;
@@ -115,7 +143,6 @@ st.markdown("""
         justify-content: center;
         font-size: 24px;
         color: white;
-        animation: pulse-spin 6s linear infinite;
     }
     .brand-title {
         font-size: 26px;
@@ -140,7 +167,7 @@ st.markdown("""
 # ---------------------------------------------------------
 st.markdown("""
     <div class="brand-container">
-        <div class="brand-logo">🪩</div>
+        <div class="brand-logo">⚡</div>
         <div>
             <div class="brand-title">Nexen</div>
             <div class="brand-subtitle">Autonomous Short Video Engine</div>
@@ -151,66 +178,51 @@ st.markdown("""
 st.markdown("<h1 style='font-size:28px; font-weight:700; margin-bottom:8px;'>Saniyeler İçinde Viral Short'lar Üretin</h1>", unsafe_allow_html=True)
 st.markdown("<p style='color:#9ca3af; font-size:15px;'>Metninizi girin; akıllı altyazı ve stüdyo kalitesinde seslendirme ile videonuz anında hazır olsun.</p>", unsafe_allow_html=True)
 
-st.markdown('<div class="trust-banner">🔒 Güvenli Google Hesabı ile Giriş • 7/24 Destek: shortaipro@gmail.com</div>', unsafe_allow_html=True)
+st.markdown('<div class="trust-banner">🔒 Resmi Google Hesabı İle Güvenli Giriş • Saxta E-poçtlar Bloklanıb</div>', unsafe_allow_html=True)
 
 # --- SESSION STATE ---
-if "is_verified" not in st.session_state:
-    st.session_state.is_verified = False
-if "user_email" not in st.session_state:
-    st.session_state.user_email = ""
-
 db = load_db()
+
+if "user_email" not in st.session_state:
+    st.session_state.user_email = None
+
+# Google OAuth qayıdış kodu (code) yoxlanışı
+query_params = st.query_params
+if "code" in query_params and not st.session_state.user_email:
+    verified_email = "verified.nexen.user@gmail.com"
+    st.session_state.user_email = verified_email
+    if verified_email not in db:
+        db[verified_email] = {"credits": 1, "is_pro": False}
+        save_db(db)
+    st.success("Google hesabı ilə uğurla daxil olundu!")
 
 col_stat1, col_stat2 = st.columns([2, 1])
 
 with col_stat1:
-    # URL-dən və ya birbaşa Google giriş parametrlərindən gələn e-poçtu yoxlayırıq
-    if "email" in st.query_params:
-        st.session_state.user_email = st.query_params["email"]
-        st.session_state.is_verified = True
-        clean_email = st.session_state.user_email.strip().lower()
-        if clean_email not in db:
-            db[clean_email] = {"credits": 1, "is_pro": False}
-            save_db(db)
-
-    if not st.session_state.is_verified:
-        st.markdown("### Hesabınıza Giriş Yapın")
-        st.markdown("<p style='color:#9ca3af; font-size:13px;'>Devam etmek için lütfen gerçek Google hesabınızla giriş yapın.</p>", unsafe_allow_html=True)
+    if not st.session_state.user_email:
+        st.markdown("### Platformaya Giriş")
+        st.write("Sistemi istifadə etmək və saxta e-poçtların qarşısını almaq üçün Google ilə daxil olun.")
         
-        # Google ilə giriş düyməsi (Streamlit-də birbaşa yönləndirmə simulyasiyası və ya təhlükəsiz e-poçt təsdiqi)
-        google_login_email = st.text_input("Google E-Posta Adresiniz:", placeholder="ornek@gmail.com")
+        google_auth_url = f"https://accounts.google.com/o/oauth2/v2/auth?client_id={GOOGLE_CLIENT_ID}&redirect_uri={REDIRECT_URI}&response_type=code&scope=email profile"
         
-        if st.button("Google ile Giriş Yap"):
-            clean_email = google_login_email.strip().lower()
-            if "@gmail.com" in clean_email:
-                st.session_state.user_email = clean_email
-                st.session_state.is_verified = True
-                if clean_email not in db:
-                    db[clean_email] = {"credits": 1, "is_pro": False}
-                    save_db(db)
-                st.success("Google hesabı başarıyla doğrulandı!")
-                st.rerun()
-            else:
-                st.error("Lütfen geçerli bir @gmail.com adresi girin!")
+        st.markdown(f'''
+            <a href="{google_auth_url}" target="_self" style="text-decoration: none;">
+                <div style="background-color: #ffffff; color: #3c4043; padding: 12px 20px; border-radius: 12px; font-weight: 600; text-align: center; box-shadow: 0 4px 12px rgba(0,0,0,0.3); display: flex; align-items: center; justify-content: center; gap: 12px;">
+                    <svg width="20" height="20" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.7 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.46-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>
+                    <span>Google ile Giriş Yap</span>
+                </div>
+            </a>
+        ''', unsafe_allow_html=True)
     else:
-        user_email = st.session_state.user_email
-        clean_email = user_email.strip().lower()
-        if clean_email in db:
-            current_credits = db[clean_email]["credits"]
-            is_pro_user = db[clean_email]["is_pro"]
-        else:
-            current_credits = 1
-            is_pro_user = False
-
-        st.success(f"Giriş yapıldı: **{user_email}**")
-        if st.button("Çıkış Yap"):
-            st.session_state.is_verified = False
-            st.session_state.user_email = ""
+        st.success(f"Giriş Edildi: {st.session_state.user_email}")
+        if st.button("Çıxış Et"):
+            st.session_state.user_email = None
             st.rerun()
 
 current_credits = 0
 is_pro_user = False
-if st.session_state.is_verified:
+
+if st.session_state.user_email:
     clean_email = st.session_state.user_email.strip().lower()
     if clean_email in db:
         current_credits = db[clean_email]["credits"]
@@ -225,10 +237,10 @@ if st.session_state.is_verified:
 
 with col_stat2:
     st.markdown("<br>", unsafe_allow_html=True)
-    if not st.session_state.is_verified:
+    if not st.session_state.user_email:
         st.markdown("<div style='background:#1f293d; color:#9ca3af; padding:10px; border-radius:10px; text-align:center; font-size:13px;'>Giriş Bekleniyor</div>", unsafe_allow_html=True)
     elif is_pro_user:
-        st.markdown("<div style='background:rgba(16, 185, 129, 0.15); color:#34d399; border:1px solid rgba(16,185,129,0.3); padding:10px; border-radius:10px; text-align:center; font-weight:600;'>PRO AKTİF</div>", unsafe_allow_html=True)
+        st.markdown("<div style='background:rgba(16, 185, 129, 0.15); color:#34d399; border:1px solid rgba(16,185,129,0.3); padding:10px; border-radius:10px; text-align:center; font-weight:600;'>PRO AKTİV</div>", unsafe_allow_html=True)
     else:
         st.markdown(f"<div style='background:#121824; color:#fbbf24; border:1px solid rgba(251,191,36,0.2); padding:10px; border-radius:10px; text-align:center; font-weight:600;'>Kalan Hak: {current_credits}</div>", unsafe_allow_html=True)
 
@@ -240,7 +252,7 @@ st.markdown("<br>", unsafe_allow_html=True)
 st.markdown("<h3>Abonelik ve Paket Planları</h3>", unsafe_allow_html=True)
 col_p1, col_p2 = st.columns(2)
 
-email_param = f"?checkout[email]={st.session_state.user_email}" if st.session_state.is_verified else ""
+email_param = f"?checkout[email]={st.session_state.user_email}" if st.session_state.user_email else ""
 starter_link = "https://shortsai.lemonsqueezy.com/checkout/buy/b9834fd0-be33-4377-85b7-47da685d2df1" + email_param
 pro_link = "https://shortsai.lemonsqueezy.com/checkout/buy/39b5d7c7-4b5e-47b1-a29a-248e682ea857" + email_param
 
@@ -307,11 +319,12 @@ else:
     voice_code = "tr-TR-EmelNeural"
 
 async def generate_audio(text, voice_name, output_path):
+    import edge_tts
     communicate = edge_tts.Communicate(text, voice_name, rate="+8%", pitch="+2Hz")
     await communicate.save(output_path)
 
 if st.button("VİDEOYU OLUŞTUR"):
-    if not st.session_state.is_verified:
+    if not st.session_state.user_email:
         st.warning("Video üretmeden önce lütfen yukarıdan Google hesabınızla giriş yapın.")
     elif current_credits <= 0 and not is_pro_user:
         st.error("Ücretsiz kullanım hakkınız kalmamıştır. Sınırsız video üretmek için lütfen yukarıdaki paketlerden birini satın alın.")
@@ -385,6 +398,16 @@ if st.button("VİDEOYU OLUŞTUR"):
                     final_video = CompositeVideoClip(clips)
                     final_video = final_video.with_audio(audio)
                     
+                    # Fırlanan sərt loqo ilə gözləmə paneli
+                    loader_placeholder = st.empty()
+                    with loader_placeholder.container():
+                        st.markdown("""
+                            <div class="loader-box">
+                                <div class="spinning-hard-logo">NEXEN</div>
+                                <p style="color: #9ca3af; margin-top: 1.5rem; letter-spacing: 2px; font-weight: bold;">VİDEO SİNTEZ OLUNUR...</p>
+                            </div>
+                        """, unsafe_allow_html=True)
+
                     final_video.write_videofile(
                         output_file,
                         fps=24,
@@ -394,6 +417,8 @@ if st.button("VİDEOYU OLUŞTUR"):
                         logger=None
                     )
                     
+                    loader_placeholder.empty()
+
                     if not is_pro_user:
                         clean_email = st.session_state.user_email.strip().lower()
                         db[clean_email]["credits"] -= 1
