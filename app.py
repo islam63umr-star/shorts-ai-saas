@@ -250,7 +250,7 @@ with col_stat2:
     if not st.session_state.user_email:
         st.markdown("<div style='background:#0f1523; color:#94a3b8; padding:12px; border-radius:12px; text-align:center; font-size:13px; border:1px solid #1e293b;'>Cihaz Bekleniyor</div>", unsafe_allow_html=True)
     elif is_pro_user:
-        st.markdown("<div style='background:rgba(16, 185, 129, 0.15); color:#34d399; border:1px solid rgba(16,185,129,0.3); padding:12px; border-radius:12px; text-align:center; font-weight:700;'>PRO AKTİV ⚡</div>", unsafe_allow_html=True)
+        st.markdown("<div style='background:rgba(16, 185, 129, 0.15); color:#34d399; border:1px solid rgba(16,185,129,0.3); padding:12px; border-radius:12px; text-align:center; font-weight:700;'>PRO AKTİF ⚡</div>", unsafe_allow_html=True)
     else:
         st.markdown(f"<div style='background:#0f1523; color:#fbbf24; border:1px solid rgba(251,191,36,0.3); padding:12px; border-radius:12px; text-align:center; font-weight:700;'>Kalan Hak: {current_credits}</div>", unsafe_allow_html=True)
 
@@ -448,21 +448,10 @@ if st.button("VİDEOYU ÜRET"):
     else:
         loader_placeholder = st.empty()
         with loader_placeholder.container():
-            st.markdown("""
-                <div class="loader-box-compact">
-                    <div class="spinning-ai-logo-small">
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M12 2L2 7L12 12L22 7L12 2Z" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
-                            <path d="M2 17L12 22L22 17" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
-                            <path d="M2 12L12 17L22 12" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
-                        </svg>
-                    </div>
-                    <div>
-                        <div style="font-size: 15px; font-weight: 800; color: #38bdf8; letter-spacing: 1px;">NEXEN AI ENGINE</div>
-                        <div style="color: #94a3b8; font-size: 12px; margin-top: 2px;">Video profesyonel ses ve altyazı ile sentezleniyor...</div>
-                    </div>
-                </div>
-            """, unsafe_allow_html=True)
+            st.markdown(
+                '<div class="loader-box-compact"><div class="spinning-ai-logo-small"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 2L2 7L12 12L22 7L12 2Z" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/><path d="M2 17L12 22L22 17" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/><path d="M2 12L12 17L22 12" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div><div style="font-size: 15px; font-weight: 800; color: #38bdf8; letter-spacing: 1px;">NEXEN AI ENGINE</div><div style="color: #94a3b8; font-size: 12px; margin-top: 2px;">Video profesyonel ses ve altyazı ile sentezleniyor...</div></div></div>',
+                unsafe_allow_html=True
+            )
 
         try:
             asyncio.run(process_video_generation(text_input, voice_code, font_size, st.session_state.user_email, is_pro_user, db))
@@ -478,4 +467,6 @@ st.markdown("<br><hr>", unsafe_allow_html=True)
 st.markdown("""
     <div style='text-align: center; color: #64748b; font-size: 13px;'>
         <p>Nexen Engine — Tüm hakları saklıdır. © 2026</p>
-        <p>Destek: <a href='m
+        <p>Destek: <a href='mailto:shortaipro@gmail.com' style='color: #a78bfa; text-decoration: none;'>shortaipro@gmail.com</a></p>
+    </div>
+""", unsafe_allow_html=True)
