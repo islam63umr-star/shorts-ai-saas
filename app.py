@@ -2,11 +2,9 @@ import asyncio
 import json
 import os
 import random
-import uuid
 import streamlit as st
 import edge_tts
 from moviepy import AudioFileClip, CompositeVideoClip, TextClip, VideoFileClip
-from streamlit_cookies_manager import EncryptedCookiesManager
 
 st.set_page_config(
     page_title="Nexen AI | Autonomous Short Video Engine", page_icon="⚡", layout="centered"
@@ -14,13 +12,6 @@ st.set_page_config(
 
 # --- VERİTABANI YÖNETİMİ (JSON) ---
 DB_FILE = "users_db.json"
-DEVICE_ID_COOKIE = "nexen_device_id"
-COOKIE_ENCRYPTION_KEY = "nexen_super_secure_key_2026"
-
-# --- ÇEREZ YÖNETİCİSİ (Cihaz Takibi İlə Saxtakarlığın Qarşısını Alır) ---
-cookies = EncryptedCookiesManager(prefix="nxn/", password=COOKIE_ENCRYPTION_KEY)
-if not cookies.ready():
-    st.stop()
 
 def load_db():
     if os.path.exists(DB_FILE):
@@ -34,13 +25,6 @@ def load_db():
 def save_db(db):
     with open(DB_FILE, "w") as f:
         json.dump(db, f, indent=4)
-
-# --- Cihaz ID Təyini ---
-device_id = cookies.get(DEVICE_ID_COOKIE)
-if not device_id:
-    device_id = str(uuid.uuid4())
-    cookies[DEVICE_ID_COOKIE] = device_id
-    cookies.save()
 
 # --- LİMİT VƏ PLAN YENİLƏMƏ ---
 def update_user_plan(email, plan_type):
@@ -182,9 +166,9 @@ st.markdown("""
 st.markdown("<h1 style='font-size:26px; font-weight:800; margin-bottom:8px; letter-spacing:-0.5px;'>Saniyələr İçində Viral Short'lar Yaradın</h1>", unsafe_allow_html=True)
 st.markdown("<p style='color:#94a3b8; font-size:14px;'>Ssenarinizi daxil edin; süni intellekt altyazıları, insan səslərini və peşəkar kadrları avtomatik birləşdirsin.</p>", unsafe_allow_html=True)
 
-st.markdown('<div class="trust-banner">🔒 Cihaz Təhlükəsizliyi Aktiv • Hər Cihaza Yalnız 1 Pulsuz Hak • Limitsiz Studio Gücü</div>', unsafe_allow_html=True)
+st.markdown('<div class="trust-banner">🔒 Təhlükəsiz E-poçt Qeydiyyatı • Hər Hesaba 1 Pulsuz Hak • Limitsiz Studio Gücü</div>', unsafe_allow_html=True)
 
-# --- SESSION STATE & DATABASE (CİHAZ İZLƏMƏ İLƏ QÜVİ QEYDİYYAT) ---
+# --- SESSION STATE & DATABASE ---
 db = load_db()
 
 if "user_email" not in st.session_state:
@@ -195,36 +179,21 @@ col_stat1, col_stat2 = st.columns([2, 1])
 with col_stat1:
     if not st.session_state.user_email:
         st.markdown("### Platformaya Giriş / Qeydiyyat")
-        st.write("Davam etmək üçün e-poçt ünvanınızı daxil edin (Hər cihaz yalnız bir dəfə pulsuz hak qazanır).")
+        st.write("Davam etmək üçün e-poçt ünvanınızı daxil edin (İlk girişdə avtomatik 1 pulsuz hak verilir).")
         
-        with st.form("device_secure_login"):
+        with st.form("clean_login_form"):
             email_input = st.text_input("E-poçt Ünvanı:", placeholder="ornek@gmail.com")
             login_submit = st.form_submit_button("Daxil Ol və Başla")
             
             if login_submit:
                 clean_email = email_input.strip().lower()
                 if "@" in clean_email and "." in clean_email and len(clean_email) > 5:
-                    
-                    device_already_used = False
-                    for saved_email, data in db.items():
-                        if data.get("device_id") == device_id and saved_email != clean_email:
-                            device_already_used = True
-                            break
-                    
-                    if device_already_used and clean_email not in db:
-                        st.error("Üzr istəyirik, bu cihazdan artıq pulsuz hak istifadə edilmişdir. Hər cihaz üçün yalnız 1 pulsuz hak verilir.")
-                    else:
-                        st.session_state.user_email = clean_email
-                        if clean_email not in db:
-                            db[clean_email] = {
-                                "credits": 1, 
-                                "is_pro": False, 
-                                "plan": "Pulsuz Sınaq",
-                                "device_id": device_id
-                            }
-                            save_db(db)
-                        st.success("Uğurla daxil olundu!")
-                        st.rerun()
+                    st.session_state.user_email = clean_email
+                    if clean_email not in db:
+                        db[clean_email] = {"credits": 1, "is_pro": False, "plan": "Pulsuz Sınaq"}
+                        save_db(db)
+                    st.success("Uğurla daxil olundu!")
+                    st.rerun()
                 else:
                     st.error("Zəhmət olmasa düzgün e-poçt ünvanı daxil edin (məsələn: ad@gmail.com).")
     else:
@@ -462,3 +431,4 @@ st.markdown("""
         <p>Dəstək: <a href='mailto:shortaipro@gmail.com' style='color: #a78bfa; text-decoration: none;'>shortaipro@gmail.com</a></p>
     </div>
 """, unsafe_allow_html=True)
+        
