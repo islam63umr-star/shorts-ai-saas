@@ -41,7 +41,7 @@ def update_user_plan(email, plan_type):
         save_db(db)
 
 # ---------------------------------------------------------
-# NEXEN - ULTRA PEŞAKAR & KESKİN PREMİUM STİL (DÖNƏN LOQO İLƏ)
+# NEXEN - ULTRA PEŞAKAR & KESKİN PREMİUM STİL
 # ---------------------------------------------------------
 st.markdown("""
     <style>
@@ -109,23 +109,33 @@ st.markdown("""
         box-shadow: 0 15px 35px rgba(139, 92, 246, 0.7);
     }
     
-    /* Dayanmadan fırlanan (dönən) Hiper-Modern Loqo Animasiyası */
     @keyframes nexen-continuous-spin {
-        0% { transform: rotate(0deg) scale(1); filter: drop-shadow(0 0 15px rgba(139, 92, 246, 0.8)); }
-        50% { transform: rotate(180deg) scale(1.1); filter: drop-shadow(0 0 30px rgba(56, 189, 248, 1)); }
-        100% { transform: rotate(360deg) scale(1); filter: drop-shadow(0 0 15px rgba(139, 92, 246, 0.8)); }
+        0% { transform: rotate(0deg) scale(1); filter: drop-shadow(0 0 10px rgba(139, 92, 246, 0.8)); }
+        50% { transform: rotate(180deg) scale(1.08); filter: drop-shadow(0 0 20px rgba(56, 189, 248, 1)); }
+        100% { transform: rotate(360deg) scale(1); filter: drop-shadow(0 0 10px rgba(139, 92, 246, 0.8)); }
     }
-    .spinning-ai-logo {
+    .spinning-ai-logo-small {
         display: inline-flex;
         align-items: center;
         justify-content: center;
-        width: 70px;
-        height: 70px;
+        width: 45px;
+        height: 45px;
         background: linear-gradient(135deg, #4f46e5 0%, #9333ea 50%, #06b6d4 100%);
-        border-radius: 18px;
+        border-radius: 12px;
         animation: nexen-continuous-spin 2s linear infinite;
-        margin-bottom: 15px;
-        box-shadow: 0 0 35px rgba(147, 51, 234, 0.8);
+        box-shadow: 0 0 20px rgba(147, 51, 234, 0.7);
+    }
+    
+    .loader-box-compact {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        padding: 18px 24px;
+        background: rgba(11, 16, 27, 0.95);
+        border-radius: 16px;
+        border: 1px solid rgba(56, 189, 248, 0.3);
+        margin: 1.5rem 0;
+        box-shadow: 0 15px 30px rgba(0,0,0,0.6);
     }
     
     .nexen-logo-wrapper {
@@ -145,20 +155,11 @@ st.markdown("""
         justify-content: center;
         box-shadow: 0 0 30px rgba(147, 51, 234, 0.7);
     }
-    .loader-box {
-        text-align: center;
-        padding: 3rem;
-        background: rgba(11, 16, 27, 0.95);
-        border-radius: 20px;
-        border: 1px solid rgba(56, 189, 248, 0.3);
-        margin: 2rem 0;
-        box-shadow: 0 25px 50px rgba(0,0,0,0.8);
-    }
     </style>
 """, unsafe_allow_html=True)
 
 # ---------------------------------------------------------
-# ÜST BÖLÜM: SABİT AI LOQO
+# ÜST BÖLÜM: AI LOQO
 # ---------------------------------------------------------
 st.markdown("""
     <div class="nexen-logo-wrapper">
@@ -179,20 +180,23 @@ st.markdown("""
 st.markdown("<h1 style='font-size:26px; font-weight:800; margin-bottom:8px; letter-spacing:-0.5px;'>Saniyeler İçinde Viral Short'lar Üretin</h1>", unsafe_allow_html=True)
 st.markdown("<p style='color:#94a3b8; font-size:14px;'>Senaryonuzu girin; yapay zeka altyazıları, doğal insan seslerini ve profesyonel görüntüleri otomatik birleştirsin.</p>", unsafe_allow_html=True)
 
-st.markdown('<div class="trust-banner">🔒 Güvenli E-posta Doğrulaması • Her Hesaba 1 Ücretsiz Hak • Sınırsız Stüdyo Gücü</div>', unsafe_allow_html=True)
+st.markdown('<div class="trust-banner">🔒 Güvenli E-posta Doğrulaması • Cihaz Başına 1 Ücretsiz Hak • Sınırsız Stüdyo Gücü</div>', unsafe_allow_html=True)
 
-# --- SESSION STATE & DATABASE ---
+# --- SESSION STATE & DATABASE (CİHAZ QEYDİYYAT NƏZARƏTİ) ---
 db = load_db()
 
 if "user_email" not in st.session_state:
     st.session_state.user_email = None
+
+if "device_free_claimed" not in st.session_state:
+    st.session_state.device_free_claimed = False
 
 col_stat1, col_stat2 = st.columns([2, 1])
 
 with col_stat1:
     if not st.session_state.user_email:
         st.markdown("### Platforma Giriş / Kayıt")
-        st.write("Devam etmek için e-posta adresinizi girin (İlk girişte otomatik 1 ücretsiz hak verilir).")
+        st.write("Devam etmek için gerçek e-posta adresinizi girin (Örn: adiniz@gmail.com).")
         
         with st.form("clean_login_form"):
             email_input = st.text_input("E-posta Adresi:", placeholder="ornek@gmail.com")
@@ -200,18 +204,23 @@ with col_stat1:
             
             if login_submit:
                 clean_email = email_input.strip().lower()
-                username_part = clean_email.split('@')[0] if '@' in clean_email else ""
-                has_vowel = any(v in username_part for v in 'aeiouəöüıi')
+                valid_domains = ["gmail.com", "mail.ru", "outlook.com", "yahoo.com", "hotmail.com"]
+                is_valid_domain = any(clean_email.endswith("@" + domain) for domain in valid_domains)
                 
-                if "@" in clean_email and "." in clean_email and len(clean_email) > 6 and has_vowel:
-                    st.session_state.user_email = clean_email
-                    if clean_email not in db:
-                        db[clean_email] = {"credits": 1, "is_pro": False, "plan": "Ücretsiz Deneme"}
-                        save_db(db)
-                    st.success("Başarıyla giriş yapıldı!")
-                    st.rerun()
+                if is_valid_domain:
+                    # Əgər bu sessiyada (cihazda) artıq pulsuz hak götürülübsə və yeni yazılan e-poçt bazada yoxdursa
+                    if st.session_state.device_free_claimed and clean_email not in db:
+                        st.error("Bu cihazdan zaten 1 kez ücretsiz hak kullanılmıştır! İkinci kez ücretsiz hak verilmez. Lütfen yukarıdaki paketlerden birini seçin.")
+                    else:
+                        st.session_state.user_email = clean_email
+                        if clean_email not in db:
+                            db[clean_email] = {"credits": 1, "is_pro": False, "plan": "Ücretsiz Deneme"}
+                            save_db(db)
+                            st.session_state.device_free_claimed = True
+                        st.success("Başarıyla giriş yapıldı!")
+                        st.rerun()
                 else:
-                    st.error("Lütfen gerçek ve geçerli bir e-posta adresi girin (sahte veya anlamsız yazılar kabul edilmez).")
+                    st.error("Lütfen gerçek ve geçerli bir e-posta uzantısı girin (@gmail.com, @mail.ru, @outlook.com vb.).")
     else:
         st.success(f"Giriş Yapıldı: {st.session_state.user_email}")
         if st.button("Çıkış Yap"):
@@ -249,7 +258,7 @@ with col_p1:
         <div class="pricing-card">
             <h3 style="color: #c4b5fd; margin-bottom: 5px; font-size: 18px;">Aylık Plan</h3>
             <h2 style="color: #ffffff; margin-bottom: 12px; font-size: 24px;">$9.99 <span style="font-size: 13px; color: #94a3b8; font-weight: 400;">/ ay (200 Video)</span></h2>
-            <p style="color: #94a3b8; font-size: 13px;">Temel video üretimi ve insan sesleri.</p>
+            <p style="color: #94a3b8; font-size: 13px;">Temel video üretimi ve profesyonel insan sesleri.</p>
         </div>
     """, unsafe_allow_html=True)
     if st.button("Aylık Plan Satın Al (Test)", key="btn_monthly"):
@@ -294,15 +303,15 @@ text_input = st.text_area(
 )
 
 st.markdown("<br>", unsafe_allow_html=True)
-st.markdown("### **Adım 2:** Doğal İnsan Sesi ve Karaoke Ayarları", unsafe_allow_html=True)
+st.markdown("### **Adım 2:** Profesyonel İnsan Sesi ve Karaoke Ayarları", unsafe_allow_html=True)
 
 col1, col2 = st.columns(2)
 with col1:
     voice = st.selectbox(
-        "Doğal İnsan Sesi:",
+        "Profesyonel İnsan Sesi:",
         [
-            "Ahmet (Doğal Erkek Sesi - Popüler)",
-            "Emel (Dinamik Kadın Sesi)"
+            "Ahmet (Ağır Başlı Doğal Erkek Sesi)",
+            "Emel (Profesyonel Dinamik Kadın Sesi)"
         ]
     )
 with col2:
@@ -316,7 +325,8 @@ else:
     voice_code = "tr-TR-EmelNeural"
 
 async def generate_audio(text, voice_name, output_path):
-    communicate = edge_tts.Communicate(text, voice_name, rate="-5%", pitch="+0Hz")
+    # Səs sürəti tam ağır, səlis və insan kimi danışacaq şəkildə (-12%) tənzimləndi
+    communicate = edge_tts.Communicate(text, voice_name, rate="-12%", pitch="+0Hz")
     await communicate.save(output_path)
 
 async def process_video_generation(text, voice_code, font_size, current_email, is_pro_user, db):
@@ -400,7 +410,7 @@ async def process_video_generation(text, voice_code, font_size, current_email, i
         save_db(db)
     
     st.markdown('<div class="main-box">', unsafe_allow_html=True)
-    st.success("Videomuz karaoke efekti ve doğal insan sesiyle başarıyla oluşturuldu!")
+    st.success("Videomuz karaoke efekti ve profesyonel insan sesiyle başarıyla oluşturuldu!")
     st.video(output_file)
     
     with open(output_file, "rb") as file:
@@ -423,17 +433,18 @@ if st.button("VİDEOYU ÜRET"):
         loader_placeholder = st.empty()
         with loader_placeholder.container():
             st.markdown("""
-                <div class="loader-box">
-                    <div class="spinning-ai-logo">
-                        <svg width="36" height="36" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <div class="loader-box-compact">
+                    <div class="spinning-ai-logo-small">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                             <path d="M12 2L2 7L12 12L22 7L12 2Z" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
                             <path d="M2 17L12 22L22 17" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
                             <path d="M2 12L12 17L22 12" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
                         </svg>
                     </div>
-                    <div style="font-size: 24px; font-weight: 900; color: #38bdf8; margin-bottom: 10px; letter-spacing: 1px;">NEXEN AI</div>
-                    <p style="color: #38bdf8; letter-spacing: 2px; font-weight: 800; font-size: 14px;">VİDEO DOĞAL SES VE KARAOKE İLE SENTEZLENİYOR...</p>
-                    <p style="color: #64748b; margin-top: 0.5rem; font-size: 12px;">Kelimeler sararıyor, arka plan video ile uyum sağlanıyor</p>
+                    <div>
+                        <div style="font-size: 15px; font-weight: 800; color: #38bdf8; letter-spacing: 1px;">NEXEN AI ENGINE</div>
+                        <div style="color: #94a3b8; font-size: 12px; margin-top: 2px;">Video profesyonel ses ve altyazı ile sentezleniyor...</div>
+                    </div>
                 </div>
             """, unsafe_allow_html=True)
 
@@ -454,3 +465,4 @@ st.markdown("""
         <p>Destek: <a href='mailto:shortaipro@gmail.com' style='color: #a78bfa; text-decoration: none;'>shortaipro@gmail.com</a></p>
     </div>
 """, unsafe_allow_html=True)
+                
