@@ -32,16 +32,16 @@ def update_user_plan(email, plan_type):
     if email in db:
         if plan_type == "monthly":
             db[email]["credits"] = 200  
-            db[email]["plan"] = "Aylıq Plan (200 Video)"
+            db[email]["plan"] = "Aylık Plan (200 Video)"
             db[email]["is_pro"] = True
         elif plan_type == "yearly_unlimited":
             db[email]["credits"] = 99999  
-            db[email]["plan"] = "Sonsuz Plan (1 İl)"
+            db[email]["plan"] = "Sonsuz Plan (1 Yıl)"
             db[email]["is_pro"] = True
         save_db(db)
 
 # ---------------------------------------------------------
-# NEXEN - ULTRA PEŞAKAR & KESKİN PREMİUM STİL (YENİ PEŞƏKAR SVG LOQO)
+# NEXEN - ULTRA PEŞAKAR & KESKİN PREMİUM STİL (DÖNƏN LOQO İLƏ)
 # ---------------------------------------------------------
 st.markdown("""
     <style>
@@ -109,7 +109,25 @@ st.markdown("""
         box-shadow: 0 15px 35px rgba(139, 92, 246, 0.7);
     }
     
-    /* ChatGPT / Claude Stili Peşəkar Yanıb-sönən Neon Loqo */
+    /* Dayanmadan fırlanan (dönən) Hiper-Modern Loqo Animasiyası */
+    @keyframes nexen-continuous-spin {
+        0% { transform: rotate(0deg) scale(1); filter: drop-shadow(0 0 15px rgba(139, 92, 246, 0.8)); }
+        50% { transform: rotate(180deg) scale(1.1); filter: drop-shadow(0 0 30px rgba(56, 189, 248, 1)); }
+        100% { transform: rotate(360deg) scale(1); filter: drop-shadow(0 0 15px rgba(139, 92, 246, 0.8)); }
+    }
+    .spinning-ai-logo {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 70px;
+        height: 70px;
+        background: linear-gradient(135deg, #4f46e5 0%, #9333ea 50%, #06b6d4 100%);
+        border-radius: 18px;
+        animation: nexen-continuous-spin 2s linear infinite;
+        margin-bottom: 15px;
+        box-shadow: 0 0 35px rgba(147, 51, 234, 0.8);
+    }
+    
     .nexen-logo-wrapper {
         display: flex;
         align-items: center;
@@ -126,11 +144,6 @@ st.markdown("""
         align-items: center;
         justify-content: center;
         box-shadow: 0 0 30px rgba(147, 51, 234, 0.7);
-        animation: ai-glow 2.5s infinite ease-in-out;
-    }
-    @keyframes ai-glow {
-        0%, 100% { transform: scale(1); box-shadow: 0 0 20px rgba(147, 51, 234, 0.6); }
-        50% { transform: scale(1.06); box-shadow: 0 0 40px rgba(6, 182, 212, 0.9); }
     }
     .loader-box {
         text-align: center;
@@ -145,7 +158,7 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # ---------------------------------------------------------
-# ÜST BÖLÜM: YENİ PEŞƏKAR AI LOQO (SVG)
+# ÜST BÖLÜM: SABİT AI LOQO
 # ---------------------------------------------------------
 st.markdown("""
     <div class="nexen-logo-wrapper">
@@ -163,10 +176,10 @@ st.markdown("""
     </div>
 """, unsafe_allow_html=True)
 
-st.markdown("<h1 style='font-size:26px; font-weight:800; margin-bottom:8px; letter-spacing:-0.5px;'>Saniyələr İçində Viral Short'lar Yaradın</h1>", unsafe_allow_html=True)
-st.markdown("<p style='color:#94a3b8; font-size:14px;'>Ssenarinizi daxil edin; süni intellekt altyazıları, insan səslərini və peşəkar kadrları avtomatik birləşdirsin.</p>", unsafe_allow_html=True)
+st.markdown("<h1 style='font-size:26px; font-weight:800; margin-bottom:8px; letter-spacing:-0.5px;'>Saniyeler İçinde Viral Short'lar Üretin</h1>", unsafe_allow_html=True)
+st.markdown("<p style='color:#94a3b8; font-size:14px;'>Senaryonuzu girin; yapay zeka altyazıları, doğal insan seslerini ve profesyonel görüntüleri otomatik birleştirsin.</p>", unsafe_allow_html=True)
 
-st.markdown('<div class="trust-banner">🔒 Təhlükəsiz E-poçt Qeydiyyatı • Hər Hesaba 1 Pulsuz Hak • Limitsiz Studio Gücü</div>', unsafe_allow_html=True)
+st.markdown('<div class="trust-banner">🔒 Güvenli E-posta Doğrulaması • Her Hesaba 1 Ücretsiz Hak • Sınırsız Stüdyo Gücü</div>', unsafe_allow_html=True)
 
 # --- SESSION STATE & DATABASE ---
 db = load_db()
@@ -178,27 +191,30 @@ col_stat1, col_stat2 = st.columns([2, 1])
 
 with col_stat1:
     if not st.session_state.user_email:
-        st.markdown("### Platformaya Giriş / Qeydiyyat")
-        st.write("Davam etmək üçün e-poçt ünvanınızı daxil edin (İlk girişdə avtomatik 1 pulsuz hak verilir).")
+        st.markdown("### Platforma Giriş / Kayıt")
+        st.write("Devam etmek için e-posta adresinizi girin (İlk girişte otomatik 1 ücretsiz hak verilir).")
         
         with st.form("clean_login_form"):
-            email_input = st.text_input("E-poçt Ünvanı:", placeholder="ornek@gmail.com")
-            login_submit = st.form_submit_button("Daxil Ol və Başla")
+            email_input = st.text_input("E-posta Adresi:", placeholder="ornek@gmail.com")
+            login_submit = st.form_submit_button("Giriş Yap ve Başla")
             
             if login_submit:
                 clean_email = email_input.strip().lower()
-                if "@" in clean_email and "." in clean_email and len(clean_email) > 5:
+                username_part = clean_email.split('@')[0] if '@' in clean_email else ""
+                has_vowel = any(v in username_part for v in 'aeiouəöüıi')
+                
+                if "@" in clean_email and "." in clean_email and len(clean_email) > 6 and has_vowel:
                     st.session_state.user_email = clean_email
                     if clean_email not in db:
-                        db[clean_email] = {"credits": 1, "is_pro": False, "plan": "Pulsuz Sınaq"}
+                        db[clean_email] = {"credits": 1, "is_pro": False, "plan": "Ücretsiz Deneme"}
                         save_db(db)
-                    st.success("Uğurla daxil olundu!")
+                    st.success("Başarıyla giriş yapıldı!")
                     st.rerun()
                 else:
-                    st.error("Zəhmət olmasa düzgün e-poçt ünvanı daxil edin (məsələn: ad@gmail.com).")
+                    st.error("Lütfen gerçek ve geçerli bir e-posta adresi girin (sahte veya anlamsız yazılar kabul edilmez).")
     else:
-        st.success(f"Giriş Edildi: {st.session_state.user_email}")
-        if st.button("Çıxış Et"):
+        st.success(f"Giriş Yapıldı: {st.session_state.user_email}")
+        if st.button("Çıkış Yap"):
             st.session_state.user_email = None
             st.rerun()
 
@@ -214,83 +230,83 @@ if st.session_state.user_email:
 with col_stat2:
     st.markdown("<br>", unsafe_allow_html=True)
     if not st.session_state.user_email:
-        st.markdown("<div style='background:#0f1523; color:#94a3b8; padding:12px; border-radius:12px; text-align:center; font-size:13px; border:1px solid #1e293b;'>Giriş Gözlənilir</div>", unsafe_allow_html=True)
+        st.markdown("<div style='background:#0f1523; color:#94a3b8; padding:12px; border-radius:12px; text-align:center; font-size:13px; border:1px solid #1e293b;'>Giriş Bekleniyor</div>", unsafe_allow_html=True)
     elif is_pro_user:
-        st.markdown("<div style='background:rgba(16, 185, 129, 0.15); color:#34d399; border:1px solid rgba(16,185,129,0.3); padding:12px; border-radius:12px; text-align:center; font-weight:700;'>PRO AKTİV ⚡</div>", unsafe_allow_html=True)
+        st.markdown("<div style='background:rgba(16, 185, 129, 0.15); color:#34d399; border:1px solid rgba(16,185,129,0.3); padding:12px; border-radius:12px; text-align:center; font-weight:700;'>PRO AKTİF ⚡</div>", unsafe_allow_html=True)
     else:
-        st.markdown(f"<div style='background:#0f1523; color:#fbbf24; border:1px solid rgba(251,191,36,0.3); padding:12px; border-radius:12px; text-align:center; font-weight:700;'>Qalan Hak: {current_credits}</div>", unsafe_allow_html=True)
+        st.markdown(f"<div style='background:#0f1523; color:#fbbf24; border:1px solid rgba(251,191,36,0.3); padding:12px; border-radius:12px; text-align:center; font-weight:700;'>Kalan Hak: {current_credits}</div>", unsafe_allow_html=True)
 
 st.markdown("<br>", unsafe_allow_html=True)
 
 # ---------------------------------------------------------
-# ABONELİK PLANLARI ($9.99 və $29.99)
+# ABONELİK PLANLARI
 # ---------------------------------------------------------
-st.markdown("<h3>Abunəlik və Paket Planları</h3>", unsafe_allow_html=True)
+st.markdown("<h3>Abonelik ve Paket Planları</h3>", unsafe_allow_html=True)
 col_p1, col_p2 = st.columns(2)
 
 with col_p1:
     st.markdown("""
         <div class="pricing-card">
-            <h3 style="color: #c4b5fd; margin-bottom: 5px; font-size: 18px;">Aylıq Plan</h3>
+            <h3 style="color: #c4b5fd; margin-bottom: 5px; font-size: 18px;">Aylık Plan</h3>
             <h2 style="color: #ffffff; margin-bottom: 12px; font-size: 24px;">$9.99 <span style="font-size: 13px; color: #94a3b8; font-weight: 400;">/ ay (200 Video)</span></h2>
-            <p style="color: #94a3b8; font-size: 13px;">Təməl video istehsalı və insan səsləri.</p>
+            <p style="color: #94a3b8; font-size: 13px;">Temel video üretimi ve insan sesleri.</p>
         </div>
     """, unsafe_allow_html=True)
-    if st.button("Aylıq Plan Al (Test)", key="btn_monthly"):
+    if st.button("Aylık Plan Satın Al (Test)", key="btn_monthly"):
         if st.session_state.user_email:
             update_user_plan(st.session_state.user_email, "monthly")
-            st.success("Aylıq plan aktivləşdi! 200 video əlavə olundu.")
+            st.success("Aylık plan aktifleşti! 200 video eklendi.")
             st.rerun()
         else:
-            st.warning("Öncə giriş edin.")
+            st.warning("Önce giriş yapın.")
 
 with col_p2:
     st.markdown("""
         <div class="pricing-card">
             <h3 style="color: #38bdf8; margin-bottom: 5px; font-size: 18px;">Sonsuz Plan</h3>
-            <h2 style="color: #ffffff; margin-bottom: 12px; font-size: 24px;">$29.99 <span style="font-size: 13px; color: #94a3b8; font-weight: 400;">/ 1 İl Limitsiz</span></h2>
-            <p style="color: #94a3b8; font-size: 13px;">Bütün alətlərə və tam limitsiz rejimə giriş.</p>
+            <h2 style="color: #ffffff; margin-bottom: 12px; font-size: 24px;">$29.99 <span style="font-size: 13px; color: #94a3b8; font-weight: 400;">/ 1 Yıl Sınırsız</span></h2>
+            <p style="color: #94a3b8; font-size: 13px;">Tüm araçlara ve tam sınırsız moda erişim.</p>
         </div>
     """, unsafe_allow_html=True)
-    if st.button("Sonsuz Plan Al (Test)", key="btn_yearly"):
+    if st.button("Sonsuz Plan Satın Al (Test)", key="btn_yearly"):
         if st.session_state.user_email:
             update_user_plan(st.session_state.user_email, "yearly_unlimited")
-            st.success("Sonsuz plan aktivləşdi! 1 illik limitsiz hüquq verildi.")
+            st.success("Sonsuz plan aktifleşti! 1 yıllık sınırsız hak verildi.")
             st.rerun()
         else:
-            st.warning("Öncə giriş edin.")
+            st.warning("Önce giriş yapın.")
 
 st.divider()
 st.markdown("<br>", unsafe_allow_html=True)
 
 # ---------------------------------------------------------
-# VİDEO YARATMA PANELİ
+# VİDEO ÜRETİM PANELİ
 # ---------------------------------------------------------
 st.markdown('<div class="main-box">', unsafe_allow_html=True)
-st.markdown("### **Adım 1:** Mətninizi və ya Ssenarinizi Daxil Edin", unsafe_allow_html=True)
+st.markdown("### **Adım 1:** Metninizi veya Senaryonuzu Girin", unsafe_allow_html=True)
 
 text_input = st.text_area(
-    "Mətn:",
+    "Metin:",
     value="",
     height=130,
-    placeholder="Videoda səsləndirilməsini istədiyiniz mətni bura yazın...",
+    placeholder="Videoda seslendirilmesini istediğiniz metni buraya yazın...",
     label_visibility="collapsed"
 )
 
 st.markdown("<br>", unsafe_allow_html=True)
-st.markdown("### **Adım 2:** Təbii İnsan Səsi və Karaoke Tənzimləmələri", unsafe_allow_html=True)
+st.markdown("### **Adım 2:** Doğal İnsan Sesi ve Karaoke Ayarları", unsafe_allow_html=True)
 
 col1, col2 = st.columns(2)
 with col1:
     voice = st.selectbox(
-        "Təbii İnsan Səsi:",
+        "Doğal İnsan Sesi:",
         [
-            "Ahmet (Təbii Kişi Səsi - Populyar)",
-            "Emel (Dinamik Qadın Səsi)"
+            "Ahmet (Doğal Erkek Sesi - Popüler)",
+            "Emel (Dinamik Kadın Sesi)"
         ]
     )
 with col2:
-    font_size = st.slider("Altyazı Ölçüsü:", 30, 50, 40)
+    font_size = st.slider("Altyazı Boyutu:", 30, 50, 40)
 
 st.markdown("</div>", unsafe_allow_html=True)
 
@@ -300,7 +316,7 @@ else:
     voice_code = "tr-TR-EmelNeural"
 
 async def generate_audio(text, voice_name, output_path):
-    communicate = edge_tts.Communicate(text, voice_name, rate="+8%", pitch="+2Hz")
+    communicate = edge_tts.Communicate(text, voice_name, rate="-5%", pitch="+0Hz")
     await communicate.save(output_path)
 
 async def process_video_generation(text, voice_code, font_size, current_email, is_pro_user, db):
@@ -310,7 +326,7 @@ async def process_video_generation(text, voice_code, font_size, current_email, i
     available_bgs = sorted([f for f in os.listdir(".") if f.endswith(".mp4") and f != "final_output.mp4"])
     
     if not available_bgs:
-        st.error("Xəta: Serverdə heç bir fon videosu tapılmadı. Zəhmət olmasa .mp4 formatında fon videoları əlavə edin.")
+        st.error("Hata: Sunucuda hiçbir arka plan videosu bulunamadı. Lütfen .mp4 formatında arka plan videoları ekleyin.")
         return
         
     candidates = available_bgs
@@ -384,33 +400,40 @@ async def process_video_generation(text, voice_code, font_size, current_email, i
         save_db(db)
     
     st.markdown('<div class="main-box">', unsafe_allow_html=True)
-    st.success("Videonuz karaoke effekti və insan səsi ilə uğurla yaradıldı!")
+    st.success("Videomuz karaoke efekti ve doğal insan sesiyle başarıyla oluşturuldu!")
     st.video(output_file)
     
     with open(output_file, "rb") as file:
         st.download_button(
-            label="VİDEONU YÜKLƏ (1080P)",
+            label="VİDEOYU İNDİR (1080P)",
             data=file,
             file_name="nexen_viral_short.mp4",
             mime="video/mp4"
         )
     st.markdown("</div>", unsafe_allow_html=True)
 
-if st.button("VİDEONU İSTEHSAL ET"):
+if st.button("VİDEOYU ÜRET"):
     if not st.session_state.user_email:
-        st.warning("Video yaratmazdan əvvəl zəhmət olmasa yuxarıdakı xanaya e-poçtunuzu daxil edərək daxil olun.")
+        st.warning("Video üretmeden önce lütfen yukarıdaki alana e-postanızı girerek giriş yapın.")
     elif current_credits <= 0 and not is_pro_user:
-        st.error("Pulsuz istifadə hakqınız bitmişdir. Limitsiz video yaratmaq üçün zəhmət olmasa yuxarıdakı paketlərdən birini seçin.")
+        st.error("Ücretsiz kullanım hakkınız kalmamıştır. Sınırsız video üretmek için lütfen yukarıdaki paketlerden birini seçin.")
     elif not text_input.strip():
-        st.warning("Zəhmət olmasa boş saxlamayın, bir mətn daxil edin.")
+        st.warning("Lütfen boş bırakmayın, bir metin girin.")
     else:
         loader_placeholder = st.empty()
         with loader_placeholder.container():
             st.markdown("""
                 <div class="loader-box">
-                    <div style="font-size: 24px; font-weight: 900; color: #38bdf8; margin-bottom: 10px;">NEXEN AI</div>
-                    <p style="color: #38bdf8; letter-spacing: 2px; font-weight: 800; font-size: 14px;">VİDEO İNSAN SƏSİ VƏ KARAOKE İLƏ SİNTEZ OLUNUR...</p>
-                    <p style="color: #64748b; margin-top: 0.5rem; font-size: 12px;">Sözlər saralır, fon kadrlara uyğunlaşdırılır</p>
+                    <div class="spinning-ai-logo">
+                        <svg width="36" height="36" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M12 2L2 7L12 12L22 7L12 2Z" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M2 17L12 22L22 17" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M2 12L12 17L22 12" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </div>
+                    <div style="font-size: 24px; font-weight: 900; color: #38bdf8; margin-bottom: 10px; letter-spacing: 1px;">NEXEN AI</div>
+                    <p style="color: #38bdf8; letter-spacing: 2px; font-weight: 800; font-size: 14px;">VİDEO DOĞAL SES VE KARAOKE İLE SENTEZLENİYOR...</p>
+                    <p style="color: #64748b; margin-top: 0.5rem; font-size: 12px;">Kelimeler sararıyor, arka plan video ile uyum sağlanıyor</p>
                 </div>
             """, unsafe_allow_html=True)
 
@@ -419,7 +442,7 @@ if st.button("VİDEONU İSTEHSAL ET"):
             loader_placeholder.empty()
         except Exception as e:
             loader_placeholder.empty()
-            st.error(f"İcra zamanı xəta baş verdi: {e}")
+            st.error(f"İşlem sırasında hata oluştu: {e}")
 
 # ---------------------------------------------------------
 # FOOTER
@@ -427,8 +450,7 @@ if st.button("VİDEONU İSTEHSAL ET"):
 st.markdown("<br><hr>", unsafe_allow_html=True)
 st.markdown("""
     <div style='text-align: center; color: #64748b; font-size: 13px;'>
-        <p>Nexen Engine — Bütün hüquqlar qorunur. © 2026</p>
-        <p>Dəstək: <a href='mailto:shortaipro@gmail.com' style='color: #a78bfa; text-decoration: none;'>shortaipro@gmail.com</a></p>
+        <p>Nexen Engine — Tüm hakları saklıdır. © 2026</p>
+        <p>Destek: <a href='mailto:shortaipro@gmail.com' style='color: #a78bfa; text-decoration: none;'>shortaipro@gmail.com</a></p>
     </div>
 """, unsafe_allow_html=True)
-        
