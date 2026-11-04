@@ -123,7 +123,6 @@ st.markdown("""
         box-shadow: 0 15px 35px rgba(139, 92, 246, 0.7);
     }
     
-    /* Super AI Loqo və Fırlanma Animasiyası */
     @keyframes nexen-pro-spin {
         0% { transform: rotate(0deg) scale(1); filter: drop-shadow(0 0 10px rgba(139, 92, 246, 0.8)); }
         50% { transform: rotate(180deg) scale(1.08); filter: drop-shadow(0 0 25px rgba(56, 189, 248, 1)); }
@@ -219,7 +218,6 @@ db = load_db()
 if "user_email" not in st.session_state:
     st.session_state.user_email = None
 
-# Google OAuth qayıdış kodu yoxlanışı
 query_params = st.query_params
 if "code" in query_params and not st.session_state.user_email:
     verified_email = "verified.nexen.user@gmail.com"
@@ -278,7 +276,7 @@ with col_stat2:
 st.markdown("<br>", unsafe_allow_html=True)
 
 # ---------------------------------------------------------
-# ABONELİK PLANLARI ($9.99 və $29.99)
+# ABONELİK PLANLARI
 # ---------------------------------------------------------
 st.markdown("<h3>Abunəlik və Paket Planları</h3>", unsafe_allow_html=True)
 col_p1, col_p2 = st.columns(2)
@@ -319,7 +317,7 @@ st.divider()
 st.markdown("<br>", unsafe_allow_html=True)
 
 # ---------------------------------------------------------
-# VİDEO YARATMA PANELİ (İNSAN SƏSLƏRİ VƏ KARAOKE ALTYAZI)
+# VİDEO YARATMA PANELİ
 # ---------------------------------------------------------
 st.markdown('<div class="main-box">', unsafe_allow_html=True)
 st.markdown("### **Adım 1:** Mətninizi və ya Ssenarinizi Daxil Edin", unsafe_allow_html=True)
@@ -358,6 +356,100 @@ async def generate_audio(text, voice_name, output_path):
     communicate = edge_tts.Communicate(text, voice_name, rate="+8%", pitch="+2Hz")
     await communicate.save(output_path)
 
+# Asinxron video emal funksiyası (await xətası olmaması üçün)
+async def process_video_generation(text, voice_code, font_size, current_email, is_pro_user, db):
+    audio_file = "temp_audio.mp3"
+    output_file = "final_output.mp4"
+    
+    available_bgs = sorted([f for f in os.listdir(".") if f.endswith(".mp4") and f != "final_output.mp4"])
+    
+    if not available_bgs:
+        st.error("Xəta: Serverdə heç bir fon videosu tapılmadı. Zəhmət olmasa .mp4 formatında fon videoları əlavə edin.")
+        return
+        
+    candidates = available_bgs
+    if len(available_bgs) > 1 and "last_bg" in st.session_state and st.session_state.last_bg in available_bgs:
+        candidates = [b for b in available_bgs if b != st.session_state.last_bg]
+    
+    background_video = random.choice(candidates)
+    st.session_state.last_bg = background_video
+    
+    await generate_audio(text, voice_code, audio_file)
+    
+    video = VideoFileClip(background_video)
+    audio = AudioFileClip(audio_file)
+    
+    if video.duration > audio.duration:
+        max_start = video.duration - audio.duration
+        start_time = random.uniform(0, max_start)
+        end_time = start_time + audio.duration
+        video = video.subclipped(start_time, end_time)
+    else:
+        video = video.subclipped(0, video.duration)
+    
+    words = text.split()
+    clips = [video]
+    
+    total_words = len(words)
+    time_per_word = audio.duration / max(total_words, 1)
+    
+    chunk_size = 2
+    for i in range(0, total_words, chunk_size):
+        chunk = " ".join(words[i:i + chunk_size])
+        start_time = i * time_per_word
+        end_time = min((i + chunk_size) * time_per_word, audio.duration)
+        
+        try:
+            txt_clip = (
+                TextClip(
+                    text=chunk,
+                    font="DejaVuSans-Bold",
+                    font_size=font_size,
+                    color="yellow",
+                    stroke_color="black",
+                    stroke_width=2,
+                    method="caption",
+                    size=(int(video.w * 0.85), None),
+                    margin=(20, 20)
+                )
+                .with_start(start_time)
+                .with_duration(max(0.15, end_time - start_time))
+                .with_position(("center", "center"))
+            )
+            clips.append(txt_clip)
+        except Exception:
+            pass
+    
+    final_video = CompositeVideoClip(clips)
+    final_video = final_video.with_audio(audio)
+
+    final_video.write_videofile(
+        output_file,
+        fps=24,
+        codec="libx264",
+        audio_codec="aac",
+        preset="ultrafast",
+        logger=None
+    )
+
+    if not is_pro_user:
+        clean_email = current_email.strip().lower()
+        db[clean_email]["credits"] -= 1
+        save_db(db)
+    
+    st.markdown('<div class="main-box">', unsafe_allow_html=True)
+    st.success("Videonuz karaoke effekti və insan səsi ilə uğurla yaradıldı!")
+    st.video(output_file)
+    
+    with open(output_file, "rb") as file:
+        st.download_button(
+            label="VİDEONU YÜKLƏ (1080P)",
+            data=file,
+            file_name="nexen_viral_short.mp4",
+            mime="video/mp4"
+        )
+    st.markdown("</div>", unsafe_allow_html=True)
+
 if st.button("VİDEONU İSTEHSAL ET"):
     if not st.session_state.user_email:
         st.warning("Video yaratmazdan əvvəl zəhmət olmasa yuxarıdan Google hesabınızla daxil olun.")
@@ -366,7 +458,6 @@ if st.button("VİDEONU İSTEHSAL ET"):
     elif not text_input.strip():
         st.warning("Zəhmət olmasa boş saxlamayın, bir mətn daxil edin.")
     else:
-        # Fırlanan peşəkar loqo ilə gözləmə ekranı
         loader_placeholder = st.empty()
         with loader_placeholder.container():
             st.markdown("""
@@ -378,101 +469,9 @@ if st.button("VİDEONU İSTEHSAL ET"):
             """, unsafe_allow_html=True)
 
         try:
-            audio_file = "temp_audio.mp3"
-            output_file = "final_output.mp4"
-            
-            available_bgs = sorted([f for f in os.listdir(".") if f.endswith(".mp4") and f != "final_output.mp4"])
-            
-            if not available_bgs:
-                loader_placeholder.empty()
-                st.error("Xəta: Serverdə heç bir fon videosu tapılmadı. Zəhmət olmasa .mp4 formatında fon videoları əlavə edin.")
-            else:
-                candidates = available_bgs
-                if len(available_bgs) > 1 and "last_bg" in st.session_state and st.session_state.last_bg in available_bgs:
-                    candidates = [b for b in available_bgs if b != st.session_state.last_bg]
-                
-                background_video = random.choice(candidates)
-                st.session_state.last_bg = background_video
-                
-                await generate_audio(text_input, voice_code, audio_file)
-                
-                video = VideoFileClip(background_video)
-                audio = AudioFileClip(audio_file)
-                
-                if video.duration > audio.duration:
-                    max_start = video.duration - audio.duration
-                    start_time = random.uniform(0, max_start)
-                    end_time = start_time + audio.duration
-                    video = video.subclipped(start_time, end_time)
-                else:
-                    video = video.subclipped(0, video.duration)
-                
-                words = text_input.split()
-                clips = [video]
-                
-                total_words = len(words)
-                time_per_word = audio.duration / max(total_words, 1)
-                
-                chunk_size = 2
-                for i in range(0, total_words, chunk_size):
-                    chunk = " ".join(words[i:i + chunk_size])
-                    start_time = i * time_per_word
-                    end_time = min((i + chunk_size) * time_per_word, audio.duration)
-                    
-                    try:
-                        # Karaoke effekti: oxunan söz sarı, bitən söz ağ rəngdə vizuallaşır
-                        txt_clip = (
-                            TextClip(
-                                text=chunk,
-                                font="DejaVuSans-Bold",
-                                font_size=font_size,
-                                color="yellow",
-                                stroke_color="black",
-                                stroke_width=2,
-                                method="caption",
-                                size=(int(video.w * 0.85), None),
-                                margin=(20, 20)
-                            )
-                            .with_start(start_time)
-                            .with_duration(max(0.15, end_time - start_time))
-                            .with_position(("center", "center"))
-                        )
-                        clips.append(txt_clip)
-                    except Exception:
-                        pass
-                
-                final_video = CompositeVideoClip(clips)
-                final_video = final_video.with_audio(audio)
-
-                final_video.write_videofile(
-                    output_file,
-                    fps=24,
-                    codec="libx264",
-                    audio_codec="aac",
-                    preset="ultrafast",
-                    logger=None
-                )
-                
-                loader_placeholder.empty()
-
-                if not is_pro_user:
-                    clean_email = st.session_state.user_email.strip().lower()
-                    db[clean_email]["credits"] -= 1
-                    save_db(db)
-                
-                st.markdown('<div class="main-box">', unsafe_allow_html=True)
-                st.success("Videonuz karaoke effekti və insan səsi ilə uğurla yaradıldı!")
-                st.video(output_file)
-                
-                with open(output_file, "rb") as file:
-                    st.download_button(
-                        label="VİDEONU YÜKLƏ (1080P)",
-                        data=file,
-                        file_name="nexen_viral_short.mp4",
-                        mime="video/mp4"
-                    )
-                st.markdown("</div>", unsafe_allow_html=True)
-                
+            # Asinxron funksiyanı asyncio.run ilə düzgün çağırırıq
+            asyncio.run(process_video_generation(text_input, voice_code, font_size, st.session_state.user_email, is_pro_user, db))
+            loader_placeholder.empty()
         except Exception as e:
             loader_placeholder.empty()
             st.error(f"İcra zamanı xəta baş verdi: {e}")
