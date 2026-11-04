@@ -28,17 +28,14 @@ def save_db(db, file_path):
     with open(file_path, "w") as f:
         json.dump(db, f, indent=4)
 
-# --- MÖHKƏMLƏNDİRİLMİŞ CİHAZ TANIMA (URL & SESSION KİLİDİ) ---
-if "device_id" not in st.session_state:
-    query_params = st.query_params
-    if "device" in query_params and query_params["device"]:
-        st.session_state.device_id = query_params["device"]
-    else:
-        new_dev_id = str(uuid.uuid4())
-        st.session_state.device_id = new_dev_id
-        st.query_params["device"] = new_dev_id
-
-current_device = st.session_state.device_id
+# --- QÜSUSSUZ CİHAZ KİLİDİ (URL PARAMETRİ) ---
+query_params = st.query_params
+if "device" not in query_params or not query_params["device"]:
+    new_device_id = str(uuid.uuid4())
+    st.query_params["device"] = new_device_id
+    current_device = new_device_id
+else:
+    current_device = query_params["device"]
 
 def process_successful_payment(email, plan_type):
     db = load_db(DB_FILE)
@@ -178,7 +175,7 @@ st.markdown('<div class="nexen-logo-wrapper"><div class="nexen-svg-box"><svg wid
 st.markdown("<h1 style='font-size:26px; font-weight:800; margin-bottom:8px; letter-spacing:-0.5px;'>Saniyeler İçinde Viral Short'lar Üretin</h1>", unsafe_allow_html=True)
 st.markdown("<p style='color:#94a3b8; font-size:14px;'>Senaryonuzu girin; yapay zeka altyazıları, profesyonel insan seslerini ve görüntüleri otomatik birleştirsin.</p>", unsafe_allow_html=True)
 
-st.markdown('<div class="trust-banner">🔒 Dəmir-Beton Cihaz Tanıma • Haklar Asla İtmir • Sınırsız Stüdyo Gücü</div>', unsafe_allow_html=True)
+st.markdown('<div class="trust-banner">🔒 Dəmir-Beton Cihaz Tanıma • Pulsuz Haqqınız Biti̇b • Sınırsız Stüdyo Gücü</div>', unsafe_allow_html=True)
 
 # --- VERİTABANI & CİHAZ YÖNETİMİ ---
 db = load_db(DB_FILE)
@@ -187,55 +184,55 @@ device_db = load_db(DEVICE_DB_FILE)
 if "user_email" not in st.session_state:
     st.session_state.user_email = None
 
-# Cihaz bazlı avtomatik yoxlama (Əgər bu cihaz əvvəldən bazadadırsa, e-poçtunu avtomatik tapırıq)
-if not st.session_state.user_email:
-    for saved_email, dev_id in device_db.items():
-        if dev_id == current_device:
-            st.session_state.user_email = saved_email
-            break
+# Cihaz bazlı avtomatik tanıma
+device_registered_email = None
+for saved_email, dev_id in device_db.items():
+    if dev_id == current_device:
+        device_registered_email = saved_email
+        break
 
 col_stat1, col_stat2 = st.columns([2, 1])
 
 with col_stat1:
     if not st.session_state.user_email:
-        st.markdown("### Platforma Giriş / Kayıt")
-        st.write("E-posta adresinizi girin (Cihazınız tanınır ve haklarınız korunur).")
-        
-        with st.form("clean_login_form"):
-            email_input = st.text_input("E-posta Adresi:", placeholder="ornek@gmail.com")
-            login_submit = st.form_submit_button("Giriş Yap ve Haklarımı Getir")
+        # Əgər bu cihazdan əvvəl qeydiyyat olunubsa, birbaşa həmin hesabı daxil edirik
+        if device_registered_email:
+            st.session_state.user_email = device_registered_email
+            st.rerun()
+        else:
+            st.markdown("### Platforma Giriş / Kayıt")
+            st.write("E-posta adresinizi girin (Cihaz başına 1 ücretsiz hak).")
             
-            if login_submit:
-                clean_email = email_input.strip().lower()
-                valid_domains = ["gmail.com", "mail.ru", "outlook.com", "yahoo.com", "hotmail.com"]
-                is_valid_domain = any(clean_email.endswith("@" + domain) for domain in valid_domains)
+            with st.form("clean_login_form"):
+                email_input = st.text_input("E-posta Adresi:", placeholder="ornek@gmail.com")
+                login_submit = st.form_submit_button("Giriş Yap ve Başla")
                 
-                if is_valid_domain:
-                    # Bu cihaz başqa e-poçtla qeydiyyatdadırmı?
-                    existing_email_for_device = None
-                    for semail, did in device_db.items():
-                        if did == current_device:
-                            existing_email_for_device = semail
-                            break
+                if login_submit:
+                    clean_email = email_input.strip().lower()
+                    valid_domains = ["gmail.com", "mail.ru", "outlook.com", "yahoo.com", "hotmail.com"]
+                    is_valid_domain = any(clean_email.endswith("@" + domain) for domain in valid_domains)
                     
-                    if existing_email_for_device and existing_email_for_device != clean_email:
-                        st.error(f"Bu cihaz zaten '{existing_email_for_device}' hesabına bağlıdır! Başka e-posta ile ücretsiz hak alamazsınız.")
+                    if is_valid_domain:
+                        # Cihaz yoxlaması: Bu cihazdan artıq hər hansı e-poçt ilə hak alınıbmı?
+                        if current_device in device_db.values():
+                            st.error("Bu cihazdan daha önce ücretsiz hak kullanılmıştır! Haklarınız bitmiştir, lütfen paketlerden birini seçin.")
+                        else:
+                            st.session_state.user_email = clean_email
+                            if clean_email not in db:
+                                db[clean_email] = {"credits": 1, "is_pro": False, "plan": "Ücretsiz Deneme"}
+                                save_db(db, DB_FILE)
+                            
+                            device_db[clean_email] = current_device
+                            save_db(device_db, DEVICE_DB_FILE)
+                            st.success("Giriş başarılı!")
+                            st.rerun()
                     else:
-                        st.session_state.user_email = clean_email
-                        if clean_email not in db:
-                            db[clean_email] = {"credits": 1, "is_pro": False, "plan": "Ücretsiz Deneme"}
-                            save_db(db, DB_FILE)
-                        
-                        device_db[clean_email] = current_device
-                        save_db(device_db, DEVICE_DB_FILE)
-                        st.success("Giriş başarılı!")
-                        st.rerun()
-                else:
-                    st.error("Lütfen geçerli bir e-posta uzantısı girin (@gmail.com, @mail.ru vb.).")
+                        st.error("Lütfen geçerli bir e-posta uzantısı girin (@gmail.com, @mail.ru vb.).")
     else:
-        st.success(f"Tanınan Hesap: {st.session_state.user_email} (Cihaz Kilidi Aktif 🔒)")
+        st.success(f"Tanınan Hesap: {st.session_state.user_email} (Kilitli 🔒)")
         if st.button("Çıkış Yap"):
             st.session_state.user_email = None
+            # Cihaz bazlı avtomatik daxil olmanın qarşısını almaq üçün səhifəni tam yeniləyirik
             st.rerun()
 
 current_credits = 0
