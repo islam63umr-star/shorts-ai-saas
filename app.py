@@ -205,7 +205,6 @@ with col_stat1:
                 clean_email = email_input.strip().lower()
                 if "@" in clean_email and "." in clean_email and len(clean_email) > 5:
                     
-                    # Cihazın əvvəllər başqa e-poçtla pulsuz hak alıb-almadığını yoxlayırıq
                     device_already_used = False
                     for saved_email, data in db.items():
                         if data.get("device_id") == device_id and saved_email != clean_email:
@@ -451,7 +450,7 @@ if st.button("VİDEONU İSTEHSAL ET"):
             loader_placeholder.empty()
         except Exception as e:
             loader_placeholder.empty()
-            st.error(f5"İcra zamanı xəta baş verdi: {e}")
+            st.error(f"İcra zamanı xəta baş verdi: {e}")
 
 # ---------------------------------------------------------
 # FOOTER
