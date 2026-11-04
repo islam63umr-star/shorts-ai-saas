@@ -339,8 +339,22 @@ else:
     voice_code = "tr-TR-AhmetNeural"
 
 async def generate_audio(text, voice_name, output_path):
-    communicate = edge_tts.Communicate(text, voice_name, rate="-6%", pitch="+0Hz")
-    await communicate.save(output_path)
+    # Ehtiyat səs mexanizmi: Birinci əsas səslə cəhd edirik, alınmasa digər təbii səslərlə əvəz edirik
+    fallback_voices = [voice_name, "tr-TR-AhmetNeural", "tr-TR-EmelNeural"]
+    
+    success = False
+    for v in fallback_voices:
+        try:
+            communicate = edge_tts.Communicate(text, v, rate="-6%", pitch="+0Hz")
+            await communicate.save(output_path)
+            if os.path.exists(output_path) and os.path.getsize(output_path) > 1000:
+                success = True
+                break
+        except:
+            continue
+            
+    if not success:
+        raise RuntimeError("Microsoft ses sunucusu şu an yoğun veya yanıt vermiyor. Lütfen birkaç saniye sonra tekrar deneyin.")
 
 async def process_video_generation(text, voice_code, font_size, current_email, is_pro_user, db):
     audio_file = "temp_audio.mp3"
@@ -359,10 +373,7 @@ async def process_video_generation(text, voice_code, font_size, current_email, i
     background_video = random.choice(candidates)
     st.session_state.last_bg = background_video
     
-    try:
-        await generate_audio(text, voice_code, audio_file)
-    except Exception as e:
-        raise RuntimeError(f"Ses sintezi sırasında Microsoft sunucu hatası: {e}")
+    await generate_audio(text, voice_code, audio_file)
     
     video = VideoFileClip(background_video)
     audio = AudioFileClip(audio_file)
