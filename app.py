@@ -28,12 +28,14 @@ def save_db(db, file_path):
     with open(file_path, "w") as f:
         json.dump(db, f, indent=4)
 
-# --- CİHAZ KİMLİYİ (Cihazı Həmişə Tanıyan Mexanizm) ---
-if "device_id" not in st.session_state:
-    # Sessiyada yoxdursa, brauzer yaddaşından və ya yeni ID-dən istifadə edirik
-    st.session_state.device_id = str(uuid.uuid4())
-
-current_device = st.session_state.device_id
+# --- URL QUERY PARAMETERS İLƏ DAİMİ CİHAZ TANIMA (Səhifə yenilənsə də unudulmur) ---
+query_params = st.query_params
+if "device" not in query_params or not query_params["device"]:
+    new_device_id = str(uuid.uuid4())
+    st.query_params["device"] = new_device_id
+    current_device = new_device_id
+else:
+    current_device = query_params["device"]
 
 # Ödənişdən sonra hakların bazada dərhal qorunması
 def process_successful_payment(email, plan_type):
@@ -189,7 +191,7 @@ st.markdown("""
 st.markdown("<h1 style='font-size:26px; font-weight:800; margin-bottom:8px; letter-spacing:-0.5px;'>Saniyeler İçinde Viral Short'lar Üretin</h1>", unsafe_allow_html=True)
 st.markdown("<p style='color:#94a3b8; font-size:14px;'>Senaryonuzu girin; yapay zeka altyazıları, profesyonel insan seslerini ve görüntüleri otomatik birleştirsin.</p>", unsafe_allow_html=True)
 
-st.markdown('<div class="trust-banner">🔒 Akıllı Cihaz Tanıma Sistemi • Haklarınız Otomatik Korunur • Sınırsız Stüdyo Gücü</div>', unsafe_allow_html=True)
+st.markdown('<div class="trust-banner">🔒 URL Tabanlı Cihaz Kilidi • Haklar Asla Sıfırlanmaz • Sınırsız Stüdyo Gücü</div>', unsafe_allow_html=True)
 
 # --- VERİTABANI & CİHAZ YÖNETİMİ ---
 db = load_db(DB_FILE)
@@ -198,7 +200,7 @@ device_db = load_db(DEVICE_DB_FILE)
 if "user_email" not in st.session_state:
     st.session_state.user_email = None
 
-# CİHAZ TANIMA: Əgər bu cihaz əvvəlcədən bazada qeydiyyatdadırsa, e-poçtu unutsa belə avtomatik tapırıq!
+# CİHAZ TANIMA: Cihaz bazlı avtomatik hesabın tapılması
 auto_recognized_email = None
 for saved_email, dev_id in device_db.items():
     if dev_id == current_device:
@@ -213,7 +215,7 @@ col_stat1, col_stat2 = st.columns([2, 1])
 with col_stat1:
     if not st.session_state.user_email:
         st.markdown("### Platforma Giriş / Kayıt")
-        st.write("E-posta adresinizi girin (Cihazınız otomatik tanınır ve haklarınız yüklenir).")
+        st.write("E-posta adresinizi girin (Cihazınız URL üzerinden kilitlenir ve haklarınız korunur).")
         
         with st.form("clean_login_form"):
             email_input = st.text_input("E-posta Adresi:", placeholder="ornek@gmail.com")
@@ -225,7 +227,7 @@ with col_stat1:
                 is_valid_domain = any(clean_email.endswith("@" + domain) for domain in valid_domains)
                 
                 if is_valid_domain:
-                    # Cihaz başqa e-poçtla qeydiyyatdadırmı?
+                    # Bu cihaz başqa e-poçtla qeydiyyatdadırmı?
                     existing_email_for_device = None
                     for semail, did in device_db.items():
                         if did == current_device:
@@ -233,7 +235,7 @@ with col_stat1:
                             break
                     
                     if existing_email_for_device and existing_email_for_device != clean_email:
-                        st.error(f"Bu cihaz zaten '{existing_email_for_device}' hesabına bağlıdır! Haklarınızı kaybetmemek için lütfen o e-postayı girin.")
+                        st.error(f"Bu cihaz zaten '{existing_email_for_device}' hesabına bağlıdır! Ücretsiz hak hakkınızı bu cihazdan zaten kullandınız.")
                     else:
                         st.session_state.user_email = clean_email
                         if clean_email not in db:
@@ -242,12 +244,12 @@ with col_stat1:
                         
                         device_db[clean_email] = current_device
                         save_db(device_db, DEVICE_DB_FILE)
-                        st.success("Cihazınız doğrulandı ve hesabınız yüklendi!")
+                        st.success("Cihazınız başarıyla doğrulandı!")
                         st.rerun()
                 else:
                     st.error("Lütfen geçerli bir e-posta uzantısı girin (@gmail.com, @mail.ru vb.).")
     else:
-        st.success(f"Tanınan Hesap: {st.session_state.user_email} (Cihaz Eşlendi 🔒)")
+        st.success(f"Tanınan Hesap: {st.session_state.user_email} (Kilitli 🔒)")
         if st.button("Çıkış Yap"):
             st.session_state.user_email = None
             st.rerun()
@@ -273,7 +275,7 @@ with col_stat2:
 st.markdown("<br>", unsafe_allow_html=True)
 
 # ---------------------------------------------------------
-# ABONELİK PLANLARI (ÖDƏNİŞDƏN DƏRHAL SONRA HAK YÜKLƏMƏ)
+# ABONELİK PLANLARI
 # ---------------------------------------------------------
 st.markdown("<h3>Abonelik ve Paket Planları</h3>", unsafe_allow_html=True)
 col_p1, col_p2 = st.columns(2)
@@ -283,7 +285,7 @@ with col_p1:
         <div class="pricing-card">
             <h3 style="color: #c4b5fd; margin-bottom: 5px; font-size: 18px;">Aylık Plan</h3>
             <h2 style="color: #ffffff; margin-bottom: 12px; font-size: 24px;">$9.99 <span style="font-size: 13px; color: #94a3b8; font-weight: 400;">/ ay (200 Video)</span></h2>
-            <p style="color: #94a3b8; font-size: 13px;">Ödeme onaylandığı an 200 video hakkı cihazınıza ve hesabınıza kalıcı olarak yüklenir.</p>
+            <p style="color: #94a3b8; font-size: 13px;">Ödeme onaylandığı an 200 video hakkı hesabınıza kalıcı olarak yüklenir.</p>
         </div>
     """, unsafe_allow_html=True)
     if st.button("Ödemeyi Yap ve Aylık Planı Al", key="btn_monthly"):
@@ -375,7 +377,10 @@ async def process_video_generation(text, voice_code, font_size, current_email, i
     background_video = random.choice(candidates)
     st.session_state.last_bg = background_video
     
-    await generate_audio(text, voice_code, audio_file)
+    try:
+        await generate_audio(text, voice_code, audio_file)
+    except Exception as e:
+        raise RuntimeError(f"Ses sintezi sırasında Microsoft sunucu hatası: {e}")
     
     video = VideoFileClip(background_video)
     audio = AudioFileClip(audio_file)
@@ -482,8 +487,4 @@ if st.button("VİDEOYU ÜRET"):
             loader_placeholder.empty()
         except Exception as e:
             loader_placeholder.empty()
-            st.error(f"İşlem sırasında hata oluştu: {e}")
-
-# ---------------------------------------------------------
-# FOOTER
-# -----
+            st.error(f"İşlem sırasında hata oluştu: {  
