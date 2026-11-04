@@ -120,7 +120,6 @@ st.markdown("""
         transform: translateY(-2px);
         box-shadow: 0 15px 35px rgba(139, 92, 246, 0.7);
     }
-    
     @keyframes nexen-continuous-spin {
         0% { transform: rotate(0deg) scale(1); filter: drop-shadow(0 0 10px rgba(139, 92, 246, 0.8)); }
         50% { transform: rotate(180deg) scale(1.08); filter: drop-shadow(0 0 20px rgba(56, 189, 248, 1)); }
@@ -171,21 +170,7 @@ st.markdown("""
 # ---------------------------------------------------------
 # ÜST BÖLÜM: AI LOQO
 # ---------------------------------------------------------
-st.markdown("""
-    <div class="nexen-logo-wrapper">
-        <div class="nexen-svg-box">
-            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M12 2L2 7L12 12L22 7L12 2Z" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
-                <path d="M2 17L12 22L22 17" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
-                <path d="M2 12L12 17L22 12" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
-        </div>
-        <div>
-            <div style="font-size: 28px; font-weight: 900; background: linear-gradient(90deg, #ffffff, #c4b5fd, #38bdf8); -webkit-background-clip: text; -webkit-text-fill-color: transparent; letter-spacing: -0.5px;">NEXEN AI</div>
-            <div style="font-size: 11px; color: #94a3b8; font-weight: 600; letter-spacing: 2.5px; text-transform: uppercase;">Autonomous Short Video Engine</div>
-        </div>
-    </div>
-""", unsafe_allow_html=True)
+st.markdown('<div class="nexen-logo-wrapper"><div class="nexen-svg-box"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 2L2 7L12 12L22 7L12 2Z" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/><path d="M2 17L12 22L22 17" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/><path d="M2 12L12 17L22 12" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div><div style="font-size: 28px; font-weight: 900; background: linear-gradient(90deg, #ffffff, #c4b5fd, #38bdf8); -webkit-background-clip: text; -webkit-text-fill-color: transparent; letter-spacing: -0.5px;">NEXEN AI</div><div style="font-size: 11px; color: #94a3b8; font-weight: 600; letter-spacing: 2.5px; text-transform: uppercase;">Autonomous Short Video Engine</div></div></div>', unsafe_allow_html=True)
 
 st.markdown("<h1 style='font-size:26px; font-weight:800; margin-bottom:8px; letter-spacing:-0.5px;'>Saniyeler İçinde Viral Short'lar Üretin</h1>", unsafe_allow_html=True)
 st.markdown("<p style='color:#94a3b8; font-size:14px;'>Senaryonuzu girin; yapay zeka altyazıları, profesyonel insan seslerini ve görüntüleri otomatik birleştirsin.</p>", unsafe_allow_html=True)
@@ -265,7 +250,7 @@ with col_stat2:
     if not st.session_state.user_email:
         st.markdown("<div style='background:#0f1523; color:#94a3b8; padding:12px; border-radius:12px; text-align:center; font-size:13px; border:1px solid #1e293b;'>Cihaz Bekleniyor</div>", unsafe_allow_html=True)
     elif is_pro_user:
-        st.markdown("<div style='background:rgba(16, 185, 129, 0.15); color:#34d399; border:1px solid rgba(16,185,129,0.3); padding:12px; border-radius:12px; text-align:center; font-weight:700;'>PRO AKTİF ⚡</div>", unsafe_allow_html=True)
+        st.markdown("<div style='background:rgba(16, 185, 129, 0.15); color:#34d399; border:1px solid rgba(16,185,129,0.3); padding:12px; border-radius:12px; text-align:center; font-weight:700;'>PRO AKTİV ⚡</div>", unsafe_allow_html=True)
     else:
         st.markdown(f"<div style='background:#0f1523; color:#fbbf24; border:1px solid rgba(251,191,36,0.3); padding:12px; border-radius:12px; text-align:center; font-weight:700;'>Kalan Hak: {current_credits}</div>", unsafe_allow_html=True)
 
@@ -491,3 +476,6 @@ if st.button("VİDEOYU ÜRET"):
 # ---------------------------------------------------------
 st.markdown("<br><hr>", unsafe_allow_html=True)
 st.markdown("""
+    <div style='text-align: center; color: #64748b; font-size: 13px;'>
+        <p>Nexen Engine — Tüm hakları saklıdır. © 2026</p>
+        <p>Destek: <a href='m
