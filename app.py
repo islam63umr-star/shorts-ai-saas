@@ -175,7 +175,7 @@ st.markdown('<div class="nexen-logo-wrapper"><div class="nexen-svg-box"><svg wid
 st.markdown("<h1 style='font-size:26px; font-weight:800; margin-bottom:8px; letter-spacing:-0.5px;'>Saniyeler İçinde Viral Short'lar Üretin</h1>", unsafe_allow_html=True)
 st.markdown("<p style='color:#94a3b8; font-size:14px;'>Senaryonuzu girin; yapay zeka altyazıları, profesyonel insan seslerini ve görüntüleri otomatik birleştirsin.</p>", unsafe_allow_html=True)
 
-st.markdown('<div class="trust-banner">🔒 Dəmir-Beton Cihaz Tanıma • Pulsuz Haqqınız Biti̇b • Sınırsız Stüdyo Gücü</div>', unsafe_allow_html=True)
+st.markdown('<div class="trust-banner">🔒 Təhlükəsiz Giriş Sistemi • Çıxış Etmə Sərbəstliyi • Sınırsız Stüdyo Gücü</div>', unsafe_allow_html=True)
 
 # --- VERİTABANI & CİHAZ YÖNETİMİ ---
 db = load_db(DB_FILE)
@@ -184,55 +184,46 @@ device_db = load_db(DEVICE_DB_FILE)
 if "user_email" not in st.session_state:
     st.session_state.user_email = None
 
-# Cihaz bazlı avtomatik tanıma
-device_registered_email = None
-for saved_email, dev_id in device_db.items():
-    if dev_id == current_device:
-        device_registered_email = saved_email
-        break
-
 col_stat1, col_stat2 = st.columns([2, 1])
 
 with col_stat1:
     if not st.session_state.user_email:
-        # Əgər bu cihazdan əvvəl qeydiyyat olunubsa, birbaşa həmin hesabı daxil edirik
-        if device_registered_email:
-            st.session_state.user_email = device_registered_email
-            st.rerun()
-        else:
-            st.markdown("### Platforma Giriş / Kayıt")
-            st.write("E-posta adresinizi girin (Cihaz başına 1 ücretsiz hak).")
+        st.markdown("### Platforma Giriş / Kayıt")
+        st.write("E-posta adresinizi girerek devam edin.")
+        
+        with st.form("clean_login_form"):
+            email_input = st.text_input("E-posta Adresi:", placeholder="ornek@gmail.com")
+            login_submit = st.form_submit_button("Giriş Yap ve Başla")
             
-            with st.form("clean_login_form"):
-                email_input = st.text_input("E-posta Adresi:", placeholder="ornek@gmail.com")
-                login_submit = st.form_submit_button("Giriş Yap ve Başla")
+            if login_submit:
+                clean_email = email_input.strip().lower()
+                valid_domains = ["gmail.com", "mail.ru", "outlook.com", "yahoo.com", "hotmail.com"]
+                is_valid_domain = any(clean_email.endswith("@" + domain) for domain in valid_domains)
                 
-                if login_submit:
-                    clean_email = email_input.strip().lower()
-                    valid_domains = ["gmail.com", "mail.ru", "outlook.com", "yahoo.com", "hotmail.com"]
-                    is_valid_domain = any(clean_email.endswith("@" + domain) for domain in valid_domains)
+                if is_valid_domain:
+                    # Cihaz yoxlaması: Bu cihazdan daha əvvəl pulsuz hak alınıbmı?
+                    device_already_used = current_device in device_db.values()
                     
-                    if is_valid_domain:
-                        # Cihaz yoxlaması: Bu cihazdan artıq hər hansı e-poçt ilə hak alınıbmı?
-                        if current_device in device_db.values():
-                            st.error("Bu cihazdan daha önce ücretsiz hak kullanılmıştır! Haklarınız bitmiştir, lütfen paketlerden birini seçin.")
-                        else:
-                            st.session_state.user_email = clean_email
-                            if clean_email not in db:
-                                db[clean_email] = {"credits": 1, "is_pro": False, "plan": "Ücretsiz Deneme"}
-                                save_db(db, DB_FILE)
-                            
+                    if device_already_used and clean_email not in db:
+                        st.error("Bu cihazdan daha önce ücretsiz hak kullanılmıştır! Haklarınız bitmiştir, lütfen paketlerden birini seçin.")
+                    else:
+                        st.session_state.user_email = clean_email
+                        if clean_email not in db:
+                            db[clean_email] = {"credits": 1, "is_pro": False, "plan": "Ücretsiz Deneme"}
+                            save_db(db, DB_FILE)
+                        
+                        if clean_email not in device_db:
                             device_db[clean_email] = current_device
                             save_db(device_db, DEVICE_DB_FILE)
-                            st.success("Giriş başarılı!")
-                            st.rerun()
-                    else:
-                        st.error("Lütfen geçerli bir e-posta uzantısı girin (@gmail.com, @mail.ru vb.).")
+                            
+                        st.success("Giriş başarılı!")
+                        st.rerun()
+                else:
+                    st.error("Lütfen geçerli bir e-posta uzantısı girin (@gmail.com, @mail.ru vb.).")
     else:
-        st.success(f"Tanınan Hesap: {st.session_state.user_email} (Kilitli 🔒)")
+        st.success(f"Giriş Yapıldı: {st.session_state.user_email}")
         if st.button("Çıkış Yap"):
             st.session_state.user_email = None
-            # Cihaz bazlı avtomatik daxil olmanın qarşısını almaq üçün səhifəni tam yeniləyirik
             st.rerun()
 
 current_credits = 0
@@ -247,7 +238,7 @@ if st.session_state.user_email:
 with col_stat2:
     st.markdown("<br>", unsafe_allow_html=True)
     if not st.session_state.user_email:
-        st.markdown("<div style='background:#0f1523; color:#94a3b8; padding:12px; border-radius:12px; text-align:center; font-size:13px; border:1px solid #1e293b;'>Cihaz Bekleniyor</div>", unsafe_allow_html=True)
+        st.markdown("<div style='background:#0f1523; color:#94a3b8; padding:12px; border-radius:12px; text-align:center; font-size:13px; border:1px solid #1e293b;'>Giriş Bekleniyor</div>", unsafe_allow_html=True)
     elif is_pro_user:
         st.markdown("<div style='background:rgba(16, 185, 129, 0.15); color:#34d399; border:1px solid rgba(16,185,129,0.3); padding:12px; border-radius:12px; text-align:center; font-weight:700;'>PRO AKTİV ⚡</div>", unsafe_allow_html=True)
     else:
