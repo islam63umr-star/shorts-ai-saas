@@ -28,7 +28,7 @@ def save_db(db, file_path):
     with open(file_path, "w") as f:
         json.dump(db, f, indent=4)
 
-# --- URL QUERY PARAMETERS İLƏ DAİMİ CİHAZ TANIMA (Səhifə yenilənsə də unudulmur) ---
+# --- URL QUERY PARAMETERS İLƏ DAİMİ CİHAZ TANIMA ---
 query_params = st.query_params
 if "device" not in query_params or not query_params["device"]:
     new_device_id = str(uuid.uuid4())
@@ -37,7 +37,6 @@ if "device" not in query_params or not query_params["device"]:
 else:
     current_device = query_params["device"]
 
-# Ödənişdən sonra hakların bazada dərhal qorunması
 def process_successful_payment(email, plan_type):
     db = load_db(DB_FILE)
     if email in db:
@@ -200,7 +199,6 @@ device_db = load_db(DEVICE_DB_FILE)
 if "user_email" not in st.session_state:
     st.session_state.user_email = None
 
-# CİHAZ TANIMA: Cihaz bazlı avtomatik hesabın tapılması
 auto_recognized_email = None
 for saved_email, dev_id in device_db.items():
     if dev_id == current_device:
@@ -227,7 +225,6 @@ with col_stat1:
                 is_valid_domain = any(clean_email.endswith("@" + domain) for domain in valid_domains)
                 
                 if is_valid_domain:
-                    # Bu cihaz başqa e-poçtla qeydiyyatdadırmı?
                     existing_email_for_device = None
                     for semail, did in device_db.items():
                         if did == current_device:
@@ -268,7 +265,7 @@ with col_stat2:
     if not st.session_state.user_email:
         st.markdown("<div style='background:#0f1523; color:#94a3b8; padding:12px; border-radius:12px; text-align:center; font-size:13px; border:1px solid #1e293b;'>Cihaz Bekleniyor</div>", unsafe_allow_html=True)
     elif is_pro_user:
-        st.markdown("<div style='background:rgba(16, 185, 129, 0.15); color:#34d399; border:1px solid rgba(16,185,129,0.3); padding:12px; border-radius:12px; text-align:center; font-weight:700;'>PRO AKTİF ⚡</div>", unsafe_allow_html=True)
+        st.markdown("<div style='background:rgba(16, 185, 129, 0.15); color:#34d399; border:1px solid rgba(16,185,129,0.3); padding:12px; border-radius:12px; text-align:center; font-weight:700;'>PRO AKTİV ⚡</div>", unsafe_allow_html=True)
     else:
         st.markdown(f"<div style='background:#0f1523; color:#fbbf24; border:1px solid rgba(251,191,36,0.3); padding:12px; border-radius:12px; text-align:center; font-weight:700;'>Kalan Hak: {current_credits}</div>", unsafe_allow_html=True)
 
@@ -485,6 +482,12 @@ if st.button("VİDEOYU ÜRET"):
         try:
             asyncio.run(process_video_generation(text_input, voice_code, font_size, st.session_state.user_email, is_pro_user, db))
             loader_placeholder.empty()
-        except Exception as e:
+        except Exception as err:
             loader_placeholder.empty()
-            st.error(f"İşlem sırasında hata oluştu: {  
+            st.error(f"İşlem sırasında hata oluştu: {err}")
+
+# ---------------------------------------------------------
+# FOOTER
+# ---------------------------------------------------------
+st.markdown("<br><hr>", unsafe_allow_html=True)
+st.markdown("""
