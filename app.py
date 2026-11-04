@@ -265,7 +265,7 @@ with col_stat2:
     if not st.session_state.user_email:
         st.markdown("<div style='background:#0f1523; color:#94a3b8; padding:12px; border-radius:12px; text-align:center; font-size:13px; border:1px solid #1e293b;'>Cihaz Bekleniyor</div>", unsafe_allow_html=True)
     elif is_pro_user:
-        st.markdown("<div style='background:rgba(16, 185, 129, 0.15); color:#34d399; border:1px solid rgba(16,185,129,0.3); padding:12px; border-radius:12px; text-align:center; font-weight:700;'>PRO AKTİV ⚡</div>", unsafe_allow_html=True)
+        st.markdown("<div style='background:rgba(16, 185, 129, 0.15); color:#34d399; border:1px solid rgba(16,185,129,0.3); padding:12px; border-radius:12px; text-align:center; font-weight:700;'>PRO AKTİF ⚡</div>", unsafe_allow_html=True)
     else:
         st.markdown(f"<div style='background:#0f1523; color:#fbbf24; border:1px solid rgba(251,191,36,0.3); padding:12px; border-radius:12px; text-align:center; font-weight:700;'>Kalan Hak: {current_credits}</div>", unsafe_allow_html=True)
 
