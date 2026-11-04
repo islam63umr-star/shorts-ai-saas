@@ -1,3 +1,7 @@
 streamlit
 edge-tts
 moviepy
+streamlit
+edge-tts
+moviepy
+streamlit-cookies-manager
