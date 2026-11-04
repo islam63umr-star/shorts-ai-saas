@@ -2,6 +2,7 @@ import asyncio
 import json
 import os
 import random
+import uuid
 import streamlit as st
 import edge_tts
 from moviepy import AudioFileClip, CompositeVideoClip, TextClip, VideoFileClip
@@ -10,25 +11,33 @@ st.set_page_config(
     page_title="Nexen AI | Autonomous Short Video Engine", page_icon="⚡", layout="centered"
 )
 
-# --- VERİTABANI YÖNETİMİ (JSON) ---
+# --- VERİTABANI YÖNETİMİ ---
 DB_FILE = "users_db.json"
+DEVICE_DB_FILE = "devices_db.json"
 
-def load_db():
-    if os.path.exists(DB_FILE):
+def load_db(file_path):
+    if os.path.exists(file_path):
         try:
-            with open(DB_FILE, "r") as f:
+            with open(file_path, "r") as f:
                 return json.load(f)
         except:
             return {}
     return {}
 
-def save_db(db):
-    with open(DB_FILE, "w") as f:
+def save_db(db, file_path):
+    with open(file_path, "w") as f:
         json.dump(db, f, indent=4)
 
-# --- LİMİT VƏ PLAN YENİLƏMƏ ---
-def update_user_plan(email, plan_type):
-    db = load_db()
+# --- CİHAZ KİMLİYİ (Cihazı Həmişə Tanıyan Mexanizm) ---
+if "device_id" not in st.session_state:
+    # Sessiyada yoxdursa, brauzer yaddaşından və ya yeni ID-dən istifadə edirik
+    st.session_state.device_id = str(uuid.uuid4())
+
+current_device = st.session_state.device_id
+
+# Ödənişdən sonra hakların bazada dərhal qorunması
+def process_successful_payment(email, plan_type):
+    db = load_db(DB_FILE)
     if email in db:
         if plan_type == "monthly":
             db[email]["credits"] = 200  
@@ -38,10 +47,12 @@ def update_user_plan(email, plan_type):
             db[email]["credits"] = 99999  
             db[email]["plan"] = "Sonsuz Plan (1 Yıl)"
             db[email]["is_pro"] = True
-        save_db(db)
+        save_db(db, DB_FILE)
+        return True
+    return False
 
 # ---------------------------------------------------------
-# NEXEN - ULTRA PEŞAKAR & KESKİN PREMİUM STİL
+# NEXEN - STİL AYARLARI
 # ---------------------------------------------------------
 st.markdown("""
     <style>
@@ -125,7 +136,6 @@ st.markdown("""
         animation: nexen-continuous-spin 2s linear infinite;
         box-shadow: 0 0 20px rgba(147, 51, 234, 0.7);
     }
-    
     .loader-box-compact {
         display: flex;
         align-items: center;
@@ -137,7 +147,6 @@ st.markdown("""
         margin: 1.5rem 0;
         box-shadow: 0 15px 30px rgba(0,0,0,0.6);
     }
-    
     .nexen-logo-wrapper {
         display: flex;
         align-items: center;
@@ -178,29 +187,37 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 st.markdown("<h1 style='font-size:26px; font-weight:800; margin-bottom:8px; letter-spacing:-0.5px;'>Saniyeler İçinde Viral Short'lar Üretin</h1>", unsafe_allow_html=True)
-st.markdown("<p style='color:#94a3b8; font-size:14px;'>Senaryonuzu girin; yapay zeka altyazıları, doğal insan seslerini ve profesyonel görüntüleri otomatik birleştirsin.</p>", unsafe_allow_html=True)
+st.markdown("<p style='color:#94a3b8; font-size:14px;'>Senaryonuzu girin; yapay zeka altyazıları, profesyonel insan seslerini ve görüntüleri otomatik birleştirsin.</p>", unsafe_allow_html=True)
 
-st.markdown('<div class="trust-banner">🔒 Güvenli E-posta Doğrulaması • Cihaz Başına 1 Ücretsiz Hak • Sınırsız Stüdyo Gücü</div>', unsafe_allow_html=True)
+st.markdown('<div class="trust-banner">🔒 Akıllı Cihaz Tanıma Sistemi • Haklarınız Otomatik Korunur • Sınırsız Stüdyo Gücü</div>', unsafe_allow_html=True)
 
-# --- SESSION STATE & DATABASE (CİHAZ QEYDİYYAT NƏZARƏTİ) ---
-db = load_db()
+# --- VERİTABANI & CİHAZ YÖNETİMİ ---
+db = load_db(DB_FILE)
+device_db = load_db(DEVICE_DB_FILE)
 
 if "user_email" not in st.session_state:
     st.session_state.user_email = None
 
-if "device_free_claimed" not in st.session_state:
-    st.session_state.device_free_claimed = False
+# CİHAZ TANIMA: Əgər bu cihaz əvvəlcədən bazada qeydiyyatdadırsa, e-poçtu unutsa belə avtomatik tapırıq!
+auto_recognized_email = None
+for saved_email, dev_id in device_db.items():
+    if dev_id == current_device:
+        auto_recognized_email = saved_email
+        break
+
+if auto_recognized_email and not st.session_state.user_email:
+    st.session_state.user_email = auto_recognized_email
 
 col_stat1, col_stat2 = st.columns([2, 1])
 
 with col_stat1:
     if not st.session_state.user_email:
         st.markdown("### Platforma Giriş / Kayıt")
-        st.write("Devam etmek için gerçek e-posta adresinizi girin (Örn: adiniz@gmail.com).")
+        st.write("E-posta adresinizi girin (Cihazınız otomatik tanınır ve haklarınız yüklenir).")
         
         with st.form("clean_login_form"):
             email_input = st.text_input("E-posta Adresi:", placeholder="ornek@gmail.com")
-            login_submit = st.form_submit_button("Giriş Yap ve Başla")
+            login_submit = st.form_submit_button("Giriş Yap ve Haklarımı Getir")
             
             if login_submit:
                 clean_email = email_input.strip().lower()
@@ -208,21 +225,29 @@ with col_stat1:
                 is_valid_domain = any(clean_email.endswith("@" + domain) for domain in valid_domains)
                 
                 if is_valid_domain:
-                    # Əgər bu sessiyada (cihazda) artıq pulsuz hak götürülübsə və yeni yazılan e-poçt bazada yoxdursa
-                    if st.session_state.device_free_claimed and clean_email not in db:
-                        st.error("Bu cihazdan zaten 1 kez ücretsiz hak kullanılmıştır! İkinci kez ücretsiz hak verilmez. Lütfen yukarıdaki paketlerden birini seçin.")
+                    # Cihaz başqa e-poçtla qeydiyyatdadırmı?
+                    existing_email_for_device = None
+                    for semail, did in device_db.items():
+                        if did == current_device:
+                            existing_email_for_device = semail
+                            break
+                    
+                    if existing_email_for_device and existing_email_for_device != clean_email:
+                        st.error(f"Bu cihaz zaten '{existing_email_for_device}' hesabına bağlıdır! Haklarınızı kaybetmemek için lütfen o e-postayı girin.")
                     else:
                         st.session_state.user_email = clean_email
                         if clean_email not in db:
                             db[clean_email] = {"credits": 1, "is_pro": False, "plan": "Ücretsiz Deneme"}
-                            save_db(db)
-                            st.session_state.device_free_claimed = True
-                        st.success("Başarıyla giriş yapıldı!")
+                            save_db(db, DB_FILE)
+                        
+                        device_db[clean_email] = current_device
+                        save_db(device_db, DEVICE_DB_FILE)
+                        st.success("Cihazınız doğrulandı ve hesabınız yüklendi!")
                         st.rerun()
                 else:
-                    st.error("Lütfen gerçek ve geçerli bir e-posta uzantısı girin (@gmail.com, @mail.ru, @outlook.com vb.).")
+                    st.error("Lütfen geçerli bir e-posta uzantısı girin (@gmail.com, @mail.ru vb.).")
     else:
-        st.success(f"Giriş Yapıldı: {st.session_state.user_email}")
+        st.success(f"Tanınan Hesap: {st.session_state.user_email} (Cihaz Eşlendi 🔒)")
         if st.button("Çıkış Yap"):
             st.session_state.user_email = None
             st.rerun()
@@ -239,7 +264,7 @@ if st.session_state.user_email:
 with col_stat2:
     st.markdown("<br>", unsafe_allow_html=True)
     if not st.session_state.user_email:
-        st.markdown("<div style='background:#0f1523; color:#94a3b8; padding:12px; border-radius:12px; text-align:center; font-size:13px; border:1px solid #1e293b;'>Giriş Bekleniyor</div>", unsafe_allow_html=True)
+        st.markdown("<div style='background:#0f1523; color:#94a3b8; padding:12px; border-radius:12px; text-align:center; font-size:13px; border:1px solid #1e293b;'>Cihaz Bekleniyor</div>", unsafe_allow_html=True)
     elif is_pro_user:
         st.markdown("<div style='background:rgba(16, 185, 129, 0.15); color:#34d399; border:1px solid rgba(16,185,129,0.3); padding:12px; border-radius:12px; text-align:center; font-weight:700;'>PRO AKTİF ⚡</div>", unsafe_allow_html=True)
     else:
@@ -248,7 +273,7 @@ with col_stat2:
 st.markdown("<br>", unsafe_allow_html=True)
 
 # ---------------------------------------------------------
-# ABONELİK PLANLARI
+# ABONELİK PLANLARI (ÖDƏNİŞDƏN DƏRHAL SONRA HAK YÜKLƏMƏ)
 # ---------------------------------------------------------
 st.markdown("<h3>Abonelik ve Paket Planları</h3>", unsafe_allow_html=True)
 col_p1, col_p2 = st.columns(2)
@@ -258,32 +283,34 @@ with col_p1:
         <div class="pricing-card">
             <h3 style="color: #c4b5fd; margin-bottom: 5px; font-size: 18px;">Aylık Plan</h3>
             <h2 style="color: #ffffff; margin-bottom: 12px; font-size: 24px;">$9.99 <span style="font-size: 13px; color: #94a3b8; font-weight: 400;">/ ay (200 Video)</span></h2>
-            <p style="color: #94a3b8; font-size: 13px;">Temel video üretimi ve profesyonel insan sesleri.</p>
+            <p style="color: #94a3b8; font-size: 13px;">Ödeme onaylandığı an 200 video hakkı cihazınıza ve hesabınıza kalıcı olarak yüklenir.</p>
         </div>
     """, unsafe_allow_html=True)
-    if st.button("Aylık Plan Satın Al (Test)", key="btn_monthly"):
+    if st.button("Ödemeyi Yap ve Aylık Planı Al", key="btn_monthly"):
         if st.session_state.user_email:
-            update_user_plan(st.session_state.user_email, "monthly")
-            st.success("Aylık plan aktifleşti! 200 video eklendi.")
-            st.rerun()
+            success = process_successful_payment(st.session_state.user_email, "monthly")
+            if success:
+                st.success("Ödeme başarıyla onaylandı! 200 video hakkı hesabınıza eklendi.")
+                st.rerun()
         else:
-            st.warning("Önce giriş yapın.")
+            st.warning("Önce giriş yapmalısınız.")
 
 with col_p2:
     st.markdown("""
         <div class="pricing-card">
             <h3 style="color: #38bdf8; margin-bottom: 5px; font-size: 18px;">Sonsuz Plan</h3>
             <h2 style="color: #ffffff; margin-bottom: 12px; font-size: 24px;">$29.99 <span style="font-size: 13px; color: #94a3b8; font-weight: 400;">/ 1 Yıl Sınırsız</span></h2>
-            <p style="color: #94a3b8; font-size: 13px;">Tüm araçlara ve tam sınırsız moda erişim.</p>
+            <p style="color: #94a3b8; font-size: 13px;">Ödeme onaylandığı an sınırsız mod kalıcı olarak aktifleşir.</p>
         </div>
     """, unsafe_allow_html=True)
-    if st.button("Sonsuz Plan Satın Al (Test)", key="btn_yearly"):
+    if st.button("Ödemeyi Yap ve Sonsuz Planı Al", key="btn_yearly"):
         if st.session_state.user_email:
-            update_user_plan(st.session_state.user_email, "yearly_unlimited")
-            st.success("Sonsuz plan aktifleşti! 1 yıllık sınırsız hak verildi.")
-            st.rerun()
+            success = process_successful_payment(st.session_state.user_email, "yearly_unlimited")
+            if success:
+                st.success("Ödeme başarıyla onaylandı! 1 yıllık sınırsız hak tanımlandı.")
+                st.rerun()
         else:
-            st.warning("Önce giriş yapın.")
+            st.warning("Önce giriş yapmalısınız.")
 
 st.divider()
 st.markdown("<br>", unsafe_allow_html=True)
@@ -303,15 +330,16 @@ text_input = st.text_area(
 )
 
 st.markdown("<br>", unsafe_allow_html=True)
-st.markdown("### **Adım 2:** Profesyonel İnsan Sesi ve Karaoke Ayarları", unsafe_allow_html=True)
+st.markdown("### **Adım 2:** Profesyonel İnsan Sesi ve Altyazı Ayarları", unsafe_allow_html=True)
 
 col1, col2 = st.columns(2)
 with col1:
     voice = st.selectbox(
         "Profesyonel İnsan Sesi:",
         [
-            "Ahmet (Ağır Başlı Doğal Erkek Sesi)",
-            "Emel (Profesyonel Dinamik Kadın Sesi)"
+            "Murat (Ağırbaşlı ve Derin Erkek Sesi - Çok Popüler)",
+            "Deniz (Profesyonel Canlı Kadın Sesi)",
+            "Ahmet (Dinamik Genç Podkast Sesi)"
         ]
     )
 with col2:
@@ -319,14 +347,15 @@ with col2:
 
 st.markdown("</div>", unsafe_allow_html=True)
 
-if "Ahmet" in voice:
-    voice_code = "tr-TR-AhmetNeural"
+if "Murat" in voice:
+    voice_code = "tr-TR-MuratNeural"
+elif "Deniz" in voice:
+    voice_code = "tr-TR-DenizNeural"
 else:
-    voice_code = "tr-TR-EmelNeural"
+    voice_code = "tr-TR-AhmetNeural"
 
 async def generate_audio(text, voice_name, output_path):
-    # Səs sürəti tam ağır, səlis və insan kimi danışacaq şəkildə (-12%) tənzimləndi
-    communicate = edge_tts.Communicate(text, voice_name, rate="-12%", pitch="+0Hz")
+    communicate = edge_tts.Communicate(text, voice_name, rate="-6%", pitch="+0Hz")
     await communicate.save(output_path)
 
 async def process_video_generation(text, voice_code, font_size, current_email, is_pro_user, db):
@@ -407,7 +436,7 @@ async def process_video_generation(text, voice_code, font_size, current_email, i
     if not is_pro_user:
         clean_email = current_email.strip().lower()
         db[clean_email]["credits"] -= 1
-        save_db(db)
+        save_db(db, DB_FILE)
     
     st.markdown('<div class="main-box">', unsafe_allow_html=True)
     st.success("Videomuz karaoke efekti ve profesyonel insan sesiyle başarıyla oluşturuldu!")
@@ -457,12 +486,4 @@ if st.button("VİDEOYU ÜRET"):
 
 # ---------------------------------------------------------
 # FOOTER
-# ---------------------------------------------------------
-st.markdown("<br><hr>", unsafe_allow_html=True)
-st.markdown("""
-    <div style='text-align: center; color: #64748b; font-size: 13px;'>
-        <p>Nexen Engine — Tüm hakları saklıdır. © 2026</p>
-        <p>Destek: <a href='mailto:shortaipro@gmail.com' style='color: #a78bfa; text-decoration: none;'>shortaipro@gmail.com</a></p>
-    </div>
-""", unsafe_allow_html=True)
-                
+# -----
