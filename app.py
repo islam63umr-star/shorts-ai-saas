@@ -28,14 +28,17 @@ def save_db(db, file_path):
     with open(file_path, "w") as f:
         json.dump(db, f, indent=4)
 
-# --- URL QUERY PARAMETERS İLƏ DAİMİ CİHAZ TANIMA ---
-query_params = st.query_params
-if "device" not in query_params or not query_params["device"]:
-    new_device_id = str(uuid.uuid4())
-    st.query_params["device"] = new_device_id
-    current_device = new_device_id
-else:
-    current_device = query_params["device"]
+# --- MÖHKƏMLƏNDİRİLMİŞ CİHAZ TANIMA (URL & SESSION KİLİDİ) ---
+if "device_id" not in st.session_state:
+    query_params = st.query_params
+    if "device" in query_params and query_params["device"]:
+        st.session_state.device_id = query_params["device"]
+    else:
+        new_dev_id = str(uuid.uuid4())
+        st.session_state.device_id = new_dev_id
+        st.query_params["device"] = new_dev_id
+
+current_device = st.session_state.device_id
 
 def process_successful_payment(email, plan_type):
     db = load_db(DB_FILE)
@@ -175,7 +178,7 @@ st.markdown('<div class="nexen-logo-wrapper"><div class="nexen-svg-box"><svg wid
 st.markdown("<h1 style='font-size:26px; font-weight:800; margin-bottom:8px; letter-spacing:-0.5px;'>Saniyeler İçinde Viral Short'lar Üretin</h1>", unsafe_allow_html=True)
 st.markdown("<p style='color:#94a3b8; font-size:14px;'>Senaryonuzu girin; yapay zeka altyazıları, profesyonel insan seslerini ve görüntüleri otomatik birleştirsin.</p>", unsafe_allow_html=True)
 
-st.markdown('<div class="trust-banner">🔒 URL Tabanlı Cihaz Kilidi • Haklar Asla Sıfırlanmaz • Sınırsız Stüdyo Gücü</div>', unsafe_allow_html=True)
+st.markdown('<div class="trust-banner">🔒 Dəmir-Beton Cihaz Tanıma • Haklar Asla İtmir • Sınırsız Stüdyo Gücü</div>', unsafe_allow_html=True)
 
 # --- VERİTABANI & CİHAZ YÖNETİMİ ---
 db = load_db(DB_FILE)
@@ -184,21 +187,19 @@ device_db = load_db(DEVICE_DB_FILE)
 if "user_email" not in st.session_state:
     st.session_state.user_email = None
 
-auto_recognized_email = None
-for saved_email, dev_id in device_db.items():
-    if dev_id == current_device:
-        auto_recognized_email = saved_email
-        break
-
-if auto_recognized_email and not st.session_state.user_email:
-    st.session_state.user_email = auto_recognized_email
+# Cihaz bazlı avtomatik yoxlama (Əgər bu cihaz əvvəldən bazadadırsa, e-poçtunu avtomatik tapırıq)
+if not st.session_state.user_email:
+    for saved_email, dev_id in device_db.items():
+        if dev_id == current_device:
+            st.session_state.user_email = saved_email
+            break
 
 col_stat1, col_stat2 = st.columns([2, 1])
 
 with col_stat1:
     if not st.session_state.user_email:
         st.markdown("### Platforma Giriş / Kayıt")
-        st.write("E-posta adresinizi girin (Cihazınız URL üzerinden kilitlenir ve haklarınız korunur).")
+        st.write("E-posta adresinizi girin (Cihazınız tanınır ve haklarınız korunur).")
         
         with st.form("clean_login_form"):
             email_input = st.text_input("E-posta Adresi:", placeholder="ornek@gmail.com")
@@ -210,6 +211,7 @@ with col_stat1:
                 is_valid_domain = any(clean_email.endswith("@" + domain) for domain in valid_domains)
                 
                 if is_valid_domain:
+                    # Bu cihaz başqa e-poçtla qeydiyyatdadırmı?
                     existing_email_for_device = None
                     for semail, did in device_db.items():
                         if did == current_device:
@@ -217,7 +219,7 @@ with col_stat1:
                             break
                     
                     if existing_email_for_device and existing_email_for_device != clean_email:
-                        st.error(f"Bu cihaz zaten '{existing_email_for_device}' hesabına bağlıdır! Ücretsiz hak hakkınızı bu cihazdan zaten kullandınız.")
+                        st.error(f"Bu cihaz zaten '{existing_email_for_device}' hesabına bağlıdır! Başka e-posta ile ücretsiz hak alamazsınız.")
                     else:
                         st.session_state.user_email = clean_email
                         if clean_email not in db:
@@ -226,12 +228,12 @@ with col_stat1:
                         
                         device_db[clean_email] = current_device
                         save_db(device_db, DEVICE_DB_FILE)
-                        st.success("Cihazınız başarıyla doğrulandı!")
+                        st.success("Giriş başarılı!")
                         st.rerun()
                 else:
                     st.error("Lütfen geçerli bir e-posta uzantısı girin (@gmail.com, @mail.ru vb.).")
     else:
-        st.success(f"Tanınan Hesap: {st.session_state.user_email} (Kilitli 🔒)")
+        st.success(f"Tanınan Hesap: {st.session_state.user_email} (Cihaz Kilidi Aktif 🔒)")
         if st.button("Çıkış Yap"):
             st.session_state.user_email = None
             st.rerun()
@@ -250,7 +252,7 @@ with col_stat2:
     if not st.session_state.user_email:
         st.markdown("<div style='background:#0f1523; color:#94a3b8; padding:12px; border-radius:12px; text-align:center; font-size:13px; border:1px solid #1e293b;'>Cihaz Bekleniyor</div>", unsafe_allow_html=True)
     elif is_pro_user:
-        st.markdown("<div style='background:rgba(16, 185, 129, 0.15); color:#34d399; border:1px solid rgba(16,185,129,0.3); padding:12px; border-radius:12px; text-align:center; font-weight:700;'>PRO AKTİF ⚡</div>", unsafe_allow_html=True)
+        st.markdown("<div style='background:rgba(16, 185, 129, 0.15); color:#34d399; border:1px solid rgba(16,185,129,0.3); padding:12px; border-radius:12px; text-align:center; font-weight:700;'>PRO AKTİV ⚡</div>", unsafe_allow_html=True)
     else:
         st.markdown(f"<div style='background:#0f1523; color:#fbbf24; border:1px solid rgba(251,191,36,0.3); padding:12px; border-radius:12px; text-align:center; font-weight:700;'>Kalan Hak: {current_credits}</div>", unsafe_allow_html=True)
 
@@ -339,9 +341,7 @@ else:
     voice_code = "tr-TR-AhmetNeural"
 
 async def generate_audio(text, voice_name, output_path):
-    # Ehtiyat səs mexanizmi: Birinci əsas səslə cəhd edirik, alınmasa digər təbii səslərlə əvəz edirik
     fallback_voices = [voice_name, "tr-TR-AhmetNeural", "tr-TR-EmelNeural"]
-    
     success = False
     for v in fallback_voices:
         try:
@@ -354,7 +354,7 @@ async def generate_audio(text, voice_name, output_path):
             continue
             
     if not success:
-        raise RuntimeError("Microsoft ses sunucusu şu an yoğun veya yanıt vermiyor. Lütfen birkaç saniye sonra tekrar deneyin.")
+        raise RuntimeError("Microsoft ses sunucusu şu an yanıt vermiyor. Lütfen tekrar deneyin.")
 
 async def process_video_generation(text, voice_code, font_size, current_email, is_pro_user, db):
     audio_file = "temp_audio.mp3"
