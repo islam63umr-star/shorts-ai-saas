@@ -123,7 +123,7 @@ st.markdown("""
         box-shadow: 0 15px 35px rgba(139, 92, 246, 0.7);
     }
     
-    /* Super AI Loqo və Fırlanma Animasiyası (ChatGPT/Claude İlhamlı) */
+    /* Super AI Loqo və Fırlanma Animasiyası */
     @keyframes nexen-pro-spin {
         0% { transform: rotate(0deg) scale(1); filter: drop-shadow(0 0 10px rgba(139, 92, 246, 0.8)); }
         50% { transform: rotate(180deg) scale(1.08); filter: drop-shadow(0 0 25px rgba(56, 189, 248, 1)); }
@@ -282,10 +282,6 @@ st.markdown("<br>", unsafe_allow_html=True)
 # ---------------------------------------------------------
 st.markdown("<h3>Abunəlik və Paket Planları</h3>", unsafe_allow_html=True)
 col_p1, col_p2 = st.columns(2)
-
-email_param = f"?checkout[email]={st.session_state.user_email}" if st.session_state.user_email else ""
-starter_link = "https://shortsai.lemonsqueezy.com/checkout/buy/b9834fd0-be33-4377-85b7-47da685d2df1" + email_param
-pro_link = "https://shortsai.lemonsqueezy.com/checkout/buy/39b5d7c7-4b5e-47b1-a29a-248e682ea857" + email_param
 
 with col_p1:
     st.markdown("""
@@ -471,4 +467,23 @@ if st.button("VİDEONU İSTEHSAL ET"):
                 with open(output_file, "rb") as file:
                     st.download_button(
                         label="VİDEONU YÜKLƏ (1080P)",
-                   
+                        data=file,
+                        file_name="nexen_viral_short.mp4",
+                        mime="video/mp4"
+                    )
+                st.markdown("</div>", unsafe_allow_html=True)
+                
+        except Exception as e:
+            loader_placeholder.empty()
+            st.error(f"İcra zamanı xəta baş verdi: {e}")
+
+# ---------------------------------------------------------
+# FOOTER
+# ---------------------------------------------------------
+st.markdown("<br><hr>", unsafe_allow_html=True)
+st.markdown("""
+    <div style='text-align: center; color: #64748b; font-size: 13px;'>
+        <p>Nexen Engine — Bütün hüquqlar qorunur. © 2026</p>
+        <p>Dəstək: <a href='mailto:shortaipro@gmail.com' style='color: #a78bfa; text-decoration: none;'>shortaipro@gmail.com</a></p>
+    </div>
+""", unsafe_allow_html=True)
